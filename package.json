@@ -11,8 +11,12 @@
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
     "ace-builds": "latest",
+    "google-auth-library": "^9.15.1",
+    "google-spreadsheet": "^4.1.4",
     "jspdf-autotable": "^3.8.2",
+    "mongoose": "^8.12.1",
     "next": "14.1.0",
+    "nodemailer": "^6.10.0",
     "react": "^18",
     "react-dom": "^18",
     "survey-analytics": "latest",
@@ -25,6 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/nodemailer": "^6.4.17",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/wordcloud": "^1.2.2",
