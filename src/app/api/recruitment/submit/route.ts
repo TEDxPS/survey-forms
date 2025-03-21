@@ -9,11 +9,12 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const formData = await req.formData();
-  const data: Record<string, string> = {};
-  formData.forEach((value, key) => {
-    data[key] = value as string;
-  });
+  // const formData = await req.formData();
+  // const data: Record<string, string> = {};
+  // formData.forEach((value, key) => {
+  //   data[key] = value as string;
+  // });
+  const data = await req.json();
   console.log(data);
 
   // Save to database first
