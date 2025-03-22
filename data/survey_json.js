@@ -7,6 +7,7 @@ export const json = {
       elements: [
         {
           type: "text",
+          inputType: "email",
           name: "email",
           title: "Email",
           isRequired: true,
@@ -15,7 +16,7 @@ export const json = {
           type: "text",
           name: "name_ic",
           title: "Name as per IC",
-          isRequired: true,
+          isRequired: true
         },
         {
           type: "text",
@@ -46,10 +47,18 @@ export const json = {
         },
         {
           type: "text",
+          inputType: "tel",
           name: "contact",
           title: "Contact Number",
           isRequired: true,
           placeHolder: "e.g. 60123456789",
+          validators: [
+            {
+              type: "regex",
+              text: "Should be phone format",
+              regex: "\\d{10,11}"
+            }
+          ]
         },
         {
           type: "radiogroup",
