@@ -67,7 +67,7 @@ export default function SurveyComponent() {
         </div>
       )}
 
-      <Survey model={model} />
+      {!isSubmitting && !error && <Survey model={model} />}
     </div>
   );
 }

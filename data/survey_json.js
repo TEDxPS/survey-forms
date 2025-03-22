@@ -154,6 +154,13 @@ export const json = {
           title: "DOPE Result",
           description: "Test your DOPE result: https://richardstep.com/dope-personality-type-quiz/dope-bird-4-personality-types-test-questions-online-version/",
           isRequired: true,
+          validators: [
+            {
+              type: "regex",
+              text: "The DOPE result should be only one letter, either D, O, P or E",
+              regex: "^[DOPEdope]$"
+            }
+          ],
         },
       ],
     },

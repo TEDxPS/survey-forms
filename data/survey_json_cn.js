@@ -203,7 +203,14 @@ export const json = {
           name: "dope_result",
           title: "DOPE性格测试结果 *",
           description: "请在此链接进行测试：https://richardstep.com/dope-personality-type-quiz/dope-bird-4-personality-types-test-questions-online-version/",
-          isRequired: true
+          isRequired: true,
+          validators: [
+            {
+              type: "regex",
+              text: "DOPE测试结果应该只有一个字母，D、O、P或E",
+              regex: "^[DOPEdope]$"
+            }
+          ],
         }
       ]
     },
