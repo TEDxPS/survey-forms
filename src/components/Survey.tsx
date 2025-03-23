@@ -8,14 +8,12 @@ import { json } from "../../data/survey_json.js";
 import { surveyTheme } from "../../data/survey_theme_json.js";
 
 export default function SurveyComponent() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const model = new Model(json);
   model.applyTheme(surveyTheme);
 
   model.onComplete.add(async (survey, options) => {
-    setIsSubmitting(true);
     options.showSaveInProgress();
 
     try {
@@ -40,13 +38,13 @@ export default function SurveyComponent() {
       console.error("Failed to save survey results:", error);
       setError(errorMessage);
       options.showSaveError();
-    } finally {
-      setIsSubmitting(false);
     }
   });
 
-  return (
-    <div className="relative">
+  return !error ? (
+    <Survey model={model} />
+  ) : (
+    <>
       {error && (
         <div className="w-full h-dvh text-center space-y-2 py-3 bg-black">
           <p className="font-bold text-white text-2xl">{error}</p>
@@ -58,16 +56,6 @@ export default function SurveyComponent() {
           </button>
         </div>
       )}
-
-      {isSubmitting && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded shadow">
-            Submitting your response...
-          </div>
-        </div>
-      )}
-
-      {!isSubmitting && !error && <Survey model={model} />}
-    </div>
+    </>
   );
 }
