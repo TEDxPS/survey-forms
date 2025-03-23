@@ -15,7 +15,6 @@ export async function POST(req: Request) {
   //   data[key] = value as string;
   // });
   const data = await req.json();
-  console.log(data);
 
   // Save to database first
   await dbConnect();
@@ -39,9 +38,18 @@ export async function POST(req: Request) {
   );
   await doc.loadInfo(); // loads document properties and worksheets
 
+  const sheetData = Object.fromEntries(
+    Object.entries(data).map(([key, value]) => [
+      key,
+      Array.isArray(value) ? value.join(",") : String(value)
+    ])
+  ) as { [key: string]: string };
+
   const sheet = doc.sheetsByIndex[0]; // or use `doc.sheetsById[id]` or `doc.sheetsByTitle[title]`
-  await sheet.addRow(data);
-  console.log(doc.title);
+  await sheet.addRow(sheetData);
+
+  const teamSheet = doc.sheetsByTitle[data["first_choice"]];
+  await teamSheet.addRow(sheetData);
 
   return Response.json({ data: "OK" });
 }

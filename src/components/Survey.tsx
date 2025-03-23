@@ -46,7 +46,7 @@ export default function SurveyComponent() {
   ) : (
     <>
       {error && (
-        <div className="w-full h-dvh text-center space-y-2 py-3 bg-black">
+        <div className="w-full text-center space-y-2 py-3 bg-black">
           <p className="font-bold text-white text-2xl">{error}</p>
           <button
             onClick={() => setError(null)}

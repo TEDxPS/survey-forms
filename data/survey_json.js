@@ -70,7 +70,7 @@ export const json = {
             {
               type: "regex",
               text: "Should be phone format",
-              regex: "\\d{10,11}"
+              regex: "^60\\d{9,10}$"
             }
           ]
         },

@@ -73,7 +73,7 @@ export const json = {
             {
               type: "regex",
               text: "请输入正确的电话号码格式",
-              regex: "\\d{10,11}"
+              regex: "^60\\d{9,10}$"
             }
           ]
         },
