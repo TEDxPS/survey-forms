@@ -4,13 +4,13 @@ import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
 import "survey-core/survey-core.css";
 import { useState } from "react";
-import { json } from "../../data/survey_json.js";
+import { fileUploadJson } from "../../data/file_upload_json.js";
 import { surveyTheme } from "../../data/survey_theme_json.js";
 
 export default function SurveyComponent() {
   const [error, setError] = useState<string | null>(null);
 
-  const model = new Model(json);
+  const model = new Model(fileUploadJson);
   model.applyTheme(surveyTheme);
 
   model.onComplete.add(async (survey, options) => {
@@ -41,33 +41,7 @@ export default function SurveyComponent() {
     }
   });
 
-  // model.onUploadFiles.add(async (_, options) => {
-  //   const formData = new FormData();
-  //   options.files.forEach((file) => {
-  //     formData.append(file.name, file);
-  //   });
-
-  //   fetch("/api/recruitment/upload", {
-  //     method: "POST",
-  //     body: formData,
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       options.callback(
-  //         options.files.map((file) => {
-  //           return {
-  //             file: file,
-  //             content: data[file.name],
-  //           };
-  //         })
-  //       );
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error: ", error);
-  //       options.callback([], ["An error occurred during file upload."]);
-  //     });
-  // });
-
+  /* Render PDF Button */
   model.onAfterRenderPage.add(() => {
     const elements = document.getElementsByClassName("sd-description");
     for (let i = 0; i < elements.length; i++) {
@@ -86,6 +60,66 @@ export default function SurveyComponent() {
         };
         element.parentNode?.replaceChild(button, element);
       }
+    }
+  });
+
+  /* File upload function */
+  model.onUploadFiles.add(async (_, options) => {
+    const formData = new FormData();
+    options.files.forEach((file) => {
+      formData.append("file", file);
+    });
+
+    try {
+      const response = await fetch("/api/recruitment/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to upload files");
+      }
+
+      const data = await response.json();
+      console.log("Success: ", data);
+      options.callback(
+        options.files.map((file) => {
+          return {
+            file: file,
+            content: data["fileUrl"],
+          };
+        })
+      );
+    } catch (e) {
+      console.error("Error on upload file: ", error);
+      options.callback([], ["An error occurred during file upload."]);
+    }
+  });
+
+  model.onDownloadFile.add(async (_, options) => {
+    try {
+      const response = await fetch(options.content);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to download file");
+      }
+
+      const blob = await response.blob();
+
+      const file = new File([blob], options.fileValue.name, {
+        type: options.fileValue.type,
+      });
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        options.callback("success", e.target?.result || "");
+      };
+      reader.readAsDataURL(file);
+    } catch (e) {
+      console.error("Error on get file: ", error);
+      options.callback("error");
     }
   });
 
