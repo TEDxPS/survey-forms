@@ -4,13 +4,13 @@ import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
 import "survey-core/survey-core.css";
 import { useState } from "react";
-import { fileUploadJson } from "../../data/file_upload_json.js";
+import { json } from "../../data/survey_json.js";
 import { surveyTheme } from "../../data/survey_theme_json.js";
 
 export default function SurveyComponent() {
   const [error, setError] = useState<string | null>(null);
 
-  const model = new Model(fileUploadJson);
+  const model = new Model(json);
   model.applyTheme(surveyTheme);
 
   model.onComplete.add(async (survey, options) => {
