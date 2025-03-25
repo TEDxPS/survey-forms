@@ -1,6 +1,5 @@
 import { JWT } from "google-auth-library";
 import { GoogleSpreadsheet } from "google-spreadsheet";
-import nodemailer from "nodemailer";
 import dbConnect from "@/libs/mongodb";
 import FormSubmission from "@/models/FormSubmission";
 
