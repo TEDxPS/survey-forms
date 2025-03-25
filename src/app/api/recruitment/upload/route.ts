@@ -1,4 +1,5 @@
 import { bucket } from "@/libs/gcpbucket";
+import { createHash } from "crypto";
 
 export async function POST(req: Request) {
   try {
@@ -12,8 +13,10 @@ export async function POST(req: Request) {
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
+    const fileNameHash = createHash("sha256").update(file.name).digest("hex");
+
     // Create a unique filename to avoid collisions
-    const filename = `${Date.now()}-${file.name}`;
+    const filename = `${Date.now()}-${fileNameHash}`;
 
     // Create a write stream to GCP bucket
     const blob = bucket.file(filename);
