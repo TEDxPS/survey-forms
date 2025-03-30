@@ -2,7 +2,7 @@ import { editorial } from "./team_questions/editorial_json.js";
 import { visual } from "./team_questions/visual_json.js";
 import { socialMedia } from "./team_questions/social_media_json.js";
 import { videoPhoto } from "./team_questions/video_photo_json.js";
-import { infoManagement } from "./team_questions/info_management_json.js";
+import { infoTech } from "./team_questions/info_tech_json.js";
 import { partnership } from "./team_questions/partnership_json.js";
 import { foodBeverage } from "./team_questions/food_beverage_json.js";
 import { ticketing } from "./team_questions/ticketing_json.js";
@@ -158,9 +158,9 @@ export const json = {
           choices: [
             { value: "Editorial", text: "Editorial | 文案组" },
             { value: "Visual", text: "Visual - Graphic/ Animation Design | 视觉 - 平面/动画设计" },
-            { value: "Social Media Team", text: "Social Media Team | 社交媒体团队" },
-            { value: "Video & Photo Team", text: "Video & Photo Team | 视频与摄影团队" },
-            { value: "Information Management", text: "Information Management | 信息管理" },
+            { value: "Social Media", text: "Social Media Team | 社交媒体团队" },
+            { value: "Video & Photo", text: "Video & Photo Team | 视频与摄影团队" },
+            { value: "Information Technology", text: "Information Technology | 资讯科技" },
             { value: "Partnership", text: "Partnership - Monetary & In-Kind | 合作伙伴 - 资金与实物" },
             { value: "Food & Beverage", text: "Food & Beverage | 餐饮" },
             { value: "Ticketing", text: "Ticketing | 票务" },
@@ -188,7 +188,7 @@ export const json = {
             { value: "Visual", text: "Visual - Graphic/ Animation Design | 视觉 - 平面/动画设计" },
             { value: "Social Media Team", text: "Social Media Team | 社交媒体团队" },
             { value: "Video & Photo Team", text: "Video & Photo Team | 视频与摄影团队" },
-            { value: "Information Management", text: "Information Management | 信息管理" },
+            { value: "Information Technology", text: "Information Technology | 资讯科技" },
             { value: "Partnership", text: "Partnership - Monetary & In-Kind | 合作伙伴 - 资金与实物" },
             { value: "Food & Beverage", text: "Food & Beverage | 餐饮" },
             { value: "Ticketing", text: "Ticketing | 票务" },
@@ -218,7 +218,7 @@ export const json = {
     visual,
     socialMedia,
     videoPhoto,
-    infoManagement,
+    infoTech,
     partnership,
     foodBeverage,
     ticketing,

@@ -28,11 +28,13 @@ export async function POST(req: Request) {
     // Handle errors during upload
     const streamPromise = new Promise((resolve, reject) => {
       blobStream.on("error", (err) => {
+        console.log("Error uploading file:", err);
         reject(err);
       });
 
       blobStream.on("finish", () => {
         // Make the file public to get URL
+
         blob
           .makePublic()
           .then(() => {

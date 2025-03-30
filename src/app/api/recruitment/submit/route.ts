@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { JWT } from "google-auth-library";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import dbConnect from "@/libs/mongodb";
@@ -25,10 +26,19 @@ export async function POST(req: Request) {
   await submission.save();
 
   // Initialize Necessary Items
+  // const serviceAccountAuth = new JWT({
+  //   email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+  //   key: process.env.GOOGLE_PRIVATE_KEY,
+  //   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  // });
+
+  const credentials = JSON.parse(
+    readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS as string, 'utf-8')
+  );
   const serviceAccountAuth = new JWT({
-    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    key: process.env.GOOGLE_PRIVATE_KEY,
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    email: credentials.client_email,
+    key: credentials.private_key,
+    scopes: ['https://www.googleapis.com/auth/spreadsheets']
   });
 
   const doc = new GoogleSpreadsheet(
@@ -40,7 +50,9 @@ export async function POST(req: Request) {
   const sheetData = Object.fromEntries(
     Object.entries(data).map(([key, value]) => [
       key,
-      Array.isArray(value) ? value.join(",") : String(value)
+      Array.isArray(value) 
+        ? value.map(v => v.content || v).join(",")  // Extract file URL if it's a file field
+        : String(value)
     ])
   ) as { [key: string]: string };
 

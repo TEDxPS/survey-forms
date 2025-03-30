@@ -76,12 +76,13 @@ export default function SurveyComponent() {
         body: formData,
       });
 
+      const data = await response.json();
+      console.log("Data: ", data);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to upload files");
+        throw new Error(data.message || "Failed to upload files");
       }
 
-      const data = await response.json();
       console.log("Success: ", data);
       options.callback(
         options.files.map((file) => {
