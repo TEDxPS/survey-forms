@@ -15,12 +15,27 @@ export async function POST(req: Request) {
   //   data[key] = value as string;
   // });
   const data = await req.json();
+  console.log('Original data:', data);
+
+  const processedData = Object.fromEntries(
+    Object.entries(data).map(([key, value]) => [
+      key,
+      typeof value === 'object' && value !== null
+        ? Array.isArray(value)
+          ? value.map(v => v.content || v.value || v).join(", ")
+          : 'value' in value
+            ? value.value
+            : String(value)
+        : String(value)
+    ])
+  );
+  console.log('Processed data:', processedData);
 
   // Save to database first
   await dbConnect();
   const submission = new FormSubmission({
     formName: "recruitment",
-    data: data,
+    data: data,  // Keep original data in database
     emailSent: false,
   });
   await submission.save();
@@ -47,11 +62,13 @@ export async function POST(req: Request) {
   );
   await doc.loadInfo(); // loads document properties and worksheets
 
+  console.log('Entry Data: ', data);
+
   const sheetData = Object.fromEntries(
-    Object.entries(data).map(([key, value]) => [
+    Object.entries(processedData).map(([key, value]) => [
       key,
-      Array.isArray(value) 
-        ? value.map(v => v.content || v).join(",")  // Extract file URL if it's a file field
+      Array.isArray(value)
+        ? value.map(v => typeof v === 'object' && v !== null ? v.content : v).join(", ")
         : String(value)
     ])
   ) as { [key: string]: string };
@@ -59,7 +76,7 @@ export async function POST(req: Request) {
   const sheet = doc.sheetsByIndex[0]; // or use `doc.sheetsById[id]` or `doc.sheetsByTitle[title]`
   await sheet.addRow(sheetData);
 
-  const teamSheet = doc.sheetsByTitle[data["first_choice"]];
+  const teamSheet = doc.sheetsByTitle[data["first_choice"]["value"]];
   await teamSheet.addRow(sheetData);
 
   return Response.json({ data: "OK" });

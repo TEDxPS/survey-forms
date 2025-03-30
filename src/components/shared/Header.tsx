@@ -15,7 +15,7 @@ export default function Header() {
         className="flex items-center space-x-3 rtl:space-x-reverse"
       >
         <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert h-8"
+          className="relative h-8 w-auto"
           src="/tedxps_logo.png"
           alt="Next.js Logo"
           width={180}

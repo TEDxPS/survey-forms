@@ -16,13 +16,42 @@ export default function SurveyComponent() {
   model.onComplete.add(async (survey, options) => {
     options.showSaveInProgress();
 
+    const enrichedData = { ...survey.data };
+    const questions = survey.getAllQuestions();
+    
+    questions.forEach(question => {
+      const value = survey.data[question.name];
+      if (value) {
+        if (question.choices) {
+          // Handle questions with choices
+          const choice = question.choices.find((c: { value: string; text: string }) => c.value === value);
+          if (choice) {
+            enrichedData[question.name] = {
+              value: choice.value,
+              question_title: question.title,
+              answer_text: choice.text
+            };
+          }
+        } else {
+          // Handle questions without choices (text, email, etc.)
+          enrichedData[question.name] = {
+            value: value,
+            question_title: question.title,
+            answer_text: value
+          };
+        }
+      }
+    });
+
+    console.log("Enriched Survey data: ", enrichedData);
+
     try {
       const response = await fetch("/api/recruitment/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(survey.data),
+        body: JSON.stringify(enrichedData),
       });
 
       if (!response.ok) {
@@ -56,7 +85,7 @@ export default function SurveyComponent() {
         button.className = "text-[#eb0028] underline";
         button.innerHTML = "Click here to take test";
         button.onclick = () => {
-          window.open("https://www.example.com", "_blank");
+          window.open("https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing", "_blank");
         };
         element.parentNode?.replaceChild(button, element);
       }

@@ -25,17 +25,71 @@ export async function POST() {
       user: process.env.EMAIL_FROM,
       pass: process.env.EMAIL_PASSWORD,
     },
+    tls: {
+      rejectUnauthorized: false,
+    }
   });
 
   // Send email
-  await transporter.sendMail({
-    from: `"TEDx Petalling Street" <${process.env.EMAIL_FROM}>`,
-    to: submission.data.email,
-    subject: "We have received your submission",
-    text: "Hello world?", // plain text body
-    html: "<b>Hello world?</b>", // html body
-  });
+  // Create HTML content from submission data
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="${process.env.NEXT_PUBLIC_BASE_URL}/tedxps_logo.png" alt="TEDxPetallingStreet Logo" style="max-width: 200px; height: auto;"/>
+      </div>
+      <h1 style="color: #eb0028;">TEDxPetalingStreet Volunteer Application</h1>
+      <p>Thank you for your interest in joining TEDxPetalingStreet Volunteer. Here's a summary of your submission:</p>
+      
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 5px;">
+        ${Object.entries(submission.data)
+          .map(([key, value]) => {
+            if (typeof value === 'object' && value !== null) {
+              const title = 'question_title' in value ? value.question_title : key;
 
+              // Check if answer_text exists and is an array
+              if ('answer_text' in value && Array.isArray(value.answer_text)) {
+                return `
+                  <p><strong>${title}</strong><br/>
+                    ${value.answer_text.map(file => 
+                      'content' in file && 'name' in file
+                        ? `<a href="${file.content}" target="_blank">${file.name}</a>`
+                        : ''
+                    ).filter(Boolean).join(', ')}
+                  </p>
+                `;
+              }
+
+              // Handle regular fields
+              if ('question_title' in value && 'answer_text' in value) {
+                return `
+                  <p><strong>${value.question_title}</strong><br/>
+                    ${value.answer_text}
+                  </p>
+                `;
+              }
+            }
+            return `
+              <p><strong>${key}:</strong> ${value}</p>
+            `;
+          })
+          .join('')}
+      </div>
+
+      <p style="margin-top: 20px;">We will review your application and get back to you soon.</p>
+      <p>Best regards,<br>TEDxPetalingStreet Team</p>
+    </div>
+  `;
+
+  // Send email with the form data
+  await transporter.sendMail({
+    from: `"TEDxPetalingStreet" <${process.env.EMAIL_FROM}>`,
+    to: submission.data.email.value,
+    subject: "Your TEDxPetalingStreet Volunteer Application",
+    html: htmlContent,
+    text: Object.entries(submission.data)
+      .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+      .join('\n'), // Fallback plain text version
+  });
   await FormSubmission.updateOne({ _id: submission._id }, { emailSent: true });
 
   return Response.json({ data: "OK" });

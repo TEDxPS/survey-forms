@@ -13,7 +13,7 @@ import { stageManagement } from "./team_questions/stage_management_json.js";
 import { production } from "./team_questions/production_json.js";
 
 export const json = {
-  title: "TEDxPS Volunteer Application Form",
+  title: "TEDxPetalingStreet Volunteer Application",
   showQuestionNumbers: "onPage",
   showPreviewBeforeComplete: true,
   previewMode: "answeredQuestions",
