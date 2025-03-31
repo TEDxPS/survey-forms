@@ -2,8 +2,15 @@
 
 FROM node:18-alpine AS base
 
+# Define ARGs at the top level
+ARG MONGO_URI
+#ARG GOOGLE_APPLICATION_CREDENTIALS
+ARG GOOGLE_BUCKET_NAME
+
 # Install dependencies only when needed
 FROM base AS deps
+ENV MONGO_URI=${MONGO_URI}
+# ENV GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
@@ -20,6 +27,9 @@ RUN \
 
 # Rebuild the source code only when needed
 FROM base AS builder
+ENV MONGO_URI=${MONGO_URI}
+#ENV GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+ENV GOOGLE_BUCKET_NAME=${GOOGLE_BUCKET_NAME}
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -29,7 +39,8 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN \
+RUN --mount=type=secret,id=google_creds,target=/app/google-services.json \
+    export GOOGLE_APPLICATION_CREDENTIALS=/app/google-services.json && \
     if [ -f yarn.lock ]; then yarn run build; \
     elif [ -f package-lock.json ]; then npm run build; \
     elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
@@ -41,6 +52,9 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+ENV MONGO_URI=${MONGO_URI}
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -58,9 +72,4 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT=3000
-
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-ENV HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]

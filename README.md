@@ -36,3 +36,13 @@ This template covers most basic use cases. You can find code examples for them i
   - As a table
     - [data/dashboard_data.js](data/dashboard_data.js)
     - [src/components/DashboardTabulator.tsx](src/components/DashboardTabulator.tsx)
+
+# Building Docker image
+```bash
+docker build \
+  --platform linux/amd64 \
+  --secret id=google_creds,src="your Google Cloud Service Account JSON file full path" \
+  --build-arg MONGO_URI="your_mongo_uri" \
+  --build-arg GOOGLE_BUCKET_NAME="your_bucket_name" \
+  -t recruitment-form:latest .
+```
