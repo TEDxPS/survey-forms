@@ -46,3 +46,13 @@ docker build \
   --build-arg GOOGLE_BUCKET_NAME="your_bucket_name" \
   -t recruitment-form:latest .
 ```
+
+# Save Docker image
+Save the image
+```bash
+docker save recruitment-form:latest -o recruitment-form.tar
+```
+Or save with compression
+```bash
+docker save recruitment-form:latest | gzip > recruitment-form.tar.gz
+```
