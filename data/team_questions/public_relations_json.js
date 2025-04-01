@@ -1,7 +1,7 @@
 export const publicRelations = {
     name: "公共关系 Public Relations",
     description: "公共关系 Public Relations",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Public Relations" },
     visibleIf: "{first_choice} == 'Public Relations'",
     elements: [
         {

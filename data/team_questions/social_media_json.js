@@ -1,6 +1,7 @@
 export const socialMedia = {
     name: "社交媒体 Social Media Team",
     description: "Social Media team manages online presence | 社交媒体队负责管理线上平台",
+    customData: { sheetName: "Social Media" },
     visibleIf: "{first_choice} == 'Social Media'",
     elements: [
         {

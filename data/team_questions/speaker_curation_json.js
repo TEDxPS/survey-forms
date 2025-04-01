@@ -1,7 +1,7 @@
 export const speakerCuration = {
     name: "讲者策划 Speaker Curation",
     description: "讲者策划 Speaker Curation",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Speaker Curation" },
     visibleIf: "{first_choice} == 'Speaker Curation'",
     elements: [
         {

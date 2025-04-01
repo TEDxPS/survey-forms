@@ -1,7 +1,7 @@
 export const logistic = {
     name: "物流 Logistic",
     description: "物流 Logistic",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Logistic" },
     visibleIf: "{first_choice} == 'Logistic'",
     elements: [
         {

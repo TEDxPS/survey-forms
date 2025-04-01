@@ -1,7 +1,7 @@
 export const partnership = {
     name: "合作伙伴 - 金钱与商品 Partnership - Monetary & In-Kind",
     description: "合作伙伴 - 金钱与商品 Partnership - Monetary & In-Kind",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Partnership" },
     visibleIf: "{first_choice} = 'Partnership'",
     elements: [
         {

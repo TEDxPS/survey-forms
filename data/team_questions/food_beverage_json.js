@@ -1,7 +1,7 @@
 export const foodBeverage = {
     name: "餐饮 Food & Beverage",
     description: "餐饮 Food & Beverage",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Food & Beverage" },
     visibleIf: "{first_choice} = 'Food & Beverage'",
     elements: [
         {

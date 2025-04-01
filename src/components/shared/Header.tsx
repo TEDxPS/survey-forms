@@ -30,7 +30,7 @@ export default function Header() {
           href={"https://www.tedxpetalingstreet.com/en"}
         >
           <Image src={website} alt="official-website" width={25} className="invert md:invert-0" />
-          <p className="hidden md:block">Official Website</p>
+          <p className="hidden md:block text-black">Official Site</p>
         </a>
         <a
           className="block py-2 px-3 text-white rounded md:bg-transparent  md:p-0 dark:text-white"

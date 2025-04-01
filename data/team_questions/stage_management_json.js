@@ -1,7 +1,7 @@
 export const stageManagement = {
     name: "后台管理 Stage Management",
     description: "后台管理 Stage Management",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Stage Management" },
     visibleIf: "{first_choice} == 'Stage Management'",
     elements: [
         {

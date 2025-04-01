@@ -1,7 +1,7 @@
 export const production = {
     name: "导播制作 Production",
     description: "导播制作 Production",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Production" },
     visibleIf: "{first_choice} == 'Production'",
     elements: [
         {

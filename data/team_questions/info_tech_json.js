@@ -1,7 +1,7 @@
 export const infoTech = {
     name: "资讯科技 Information Technology",
     description: "资讯科技 Information Technology",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Information Technology" },
     visibleIf: "{first_choice} = 'Information Technology'",
     elements: [
         {

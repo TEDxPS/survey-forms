@@ -1,7 +1,7 @@
 export const experience = {
     name: "体验 - 参展单位/ 周边商品/ 㐀势活动 Experience - Pop Up/ Merchandize/ Adventure/",
     description: "体验 - 参展单位/ 周边商品/ 㐀势活动 Experience - Pop Up/ Merchandize/ Adventure/",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Experience" },
     visibleIf: "{first_choice} = 'Experience'",
     elements: [
         {

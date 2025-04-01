@@ -1,7 +1,7 @@
 export const videoPhoto = {
     name: "摄影 & 影片摄录 Video & Photo",
     description: "摄影 & 影片摄录 Video & Photo",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Video & Photo" },
     visibleIf: "{first_choice} == 'Video & Photo'",
     elements: [
         {

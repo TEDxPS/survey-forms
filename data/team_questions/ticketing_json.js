@@ -1,7 +1,7 @@
 export const ticketing = {
     name: "票务 Ticketing",
     description: "Ticketing team handles event admission and registration | 票务团队负责事件入场和注册",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Ticketing" },
     visibleIf: "{first_choice} == 'Ticketing'",
     elements: [
         {

@@ -9,7 +9,7 @@ export const interviewTimeB = {
             elements: [
                 {
                     type: "checkbox",
-                    name: "interview_time_b",
+                    name: "interview_time",
                     title: "Please tick date and time that you will be available for interviews (you may tick more than one) | 请选择您方便面试的日期与时间 (可多选)",
                     isRequired: true,
                     choices: [

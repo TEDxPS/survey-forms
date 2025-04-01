@@ -1,7 +1,7 @@
 export const editorial = {
     name: "文案 Editorial",
     description: "文案 Editorial",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Editorial" },
     visibleIf: "{first_choice} = 'Editorial'",
     elements: [
         {

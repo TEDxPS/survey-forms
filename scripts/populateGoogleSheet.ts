@@ -30,6 +30,9 @@ interface Team {
   name: string;
   description: string;
   elements: SurveyElement[];
+  customData?: {
+    sheetName: string;
+  };
 }
 
 const teams: Team[] = [
@@ -52,9 +55,9 @@ const teams: Team[] = [
 ];
 
 // TODO: Replace with actual credentials
-const GOOGLE_SERVICE_ACCOUNT_EMAIL = "";
-const GOOGLE_PRIVATE_KEY = "";
-const GOOGLE_SPREADSHEET_ID = "1rzjK6gEzCbdawqCn9iXUM1B8x2spyesOz34-_4bCWWk";
+const GOOGLE_SERVICE_ACCOUNT_EMAIL = "tedxpetalingstreet@friendly-autumn-455017-d1.iam.gserviceaccount.com";
+const GOOGLE_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCtoyiDl1zv2b0H\noed57yAw4c7LsKrn8q3VHj1obFKBa16fr30+MCjEHTvtNiD3PBuKxX3GtdOGNQr9\nD18mhRrJRrvU6kQNWVYmdnCRD2N/TkW3a0vFqJBpUTiLPzvkdMi8aykxlhJEcsqn\nCi6PhN/XqaumC6lc63CRTYBAZMpvLv7JEtYGVMoTQ6PsizkyHwLDNtCP8OeL0HrN\nRYgde82segyqR0B8NAVf/s7gDcuefDX8vWsACzDkF0RjHRcQ+pjlXOXI2LPHUHY3\n+EeWJG4MTbshg+IvP3dhymDsv8uNr965DpzTJpwtfY1jz/9S8K55t6Yqk0HZO6j6\n044TeM3LAgMBAAECggEAOWz1CLRGGdMWt8/9eK+zo0cC+A2pMEXr5Mh4AbGVhdTn\nOgO1dZxC1z1d5OFafLnl1/rh0pau6rtfM3tieiBaUAfzNgL2V73chqL0Lp16yA8w\ncm1rZWcOv64Ld84FdlSDUQFV4d7ikr2uNRlidbe5uh8UtDk2HZOGKqAJkwJiiuth\no6YS4jvMfJ9XeeQTzp0JwvRrb+a0N/w0i0Pq88h+YSzwWXCzCc0B4v0GhiGwJaXU\nhzUgJ1d81jMUozLtciB+DQYn/G93G7CUjf+6Mx5wt+FeY6MDb4yFs3/Myx41Z1+s\nIAfYMw+WhFCPv6fqkpyuhGis7KNr0CR07W5s6xMJ/QKBgQDjGSx6+kjKwv5ny2TO\nPeoZdu2jnuiAl9IKJLXyDt/LtdovgDdaVmFv7pbsfjfMsfLkClEBohUsZBxHH3Wx\nOQXHBRycrEaQsQvZVBLwRuULNwTNN4arR39gbamFgP+WolC0vhAX+Wr3hft/AlaK\na8ZEfmxyjhQLFW67Cv0igWHSdQKBgQDDvDvouUE0K1JHcpxWbgvK2tyP04hr4cs7\njlc1ikjC0bR/ZbUpDsXNSrm2KNU+FHbSYvC0IDj/DYOUs/0XduGqf141fIHX1iey\nRHRM6WSOvLd77kianSzrk7ncWVrffRirW2QXgRxdDPPonjkT1UBJYcJA8sFc1lQ2\njw8dhdeXPwKBgQCTu0eVRIXf6RNoYAbWp65HHHegzfn/1UOct57otUZelZE2/1iC\n2tiN4Q6rD7yq20Pfltp1joPpmcJPfiaowCiC/E9NmEBbVeEYYrnjNqs/LW5hNXLU\nrzEsgIobv/wEeNi5iz6a6fTsymr9h37Wkx+qZPeVWdmuECY1ZQOg07vYFQKBgQCG\nu7OhZqPzfT6N396tv+JuKGlat4lYeXyj6j8to5qiQCe26hPhx0FxJtbfBQyERyHj\ngCegVe3l4y+H1L2KwVJlQnde6e2W3NtGYsiLiLynZFAJBuUDSN366x0tCHT9EedB\nTQ+A/ma/xoK+xOsVM92kpZ5JhtCDTyV4yNDmyZK1kQKBgEoJwN9VY31a3u27yRpZ\nmHWPMBQcsKst6PJdsp3YeZBfBliqvyJEKE1nP8cRhSftv1AlmKBZU01T+jkMFMWS\n4ClLGcItlJc9CrN3rVxM8rmtRZfxZuLk5mlOhVorgeFDNWxL8QBg4VomlIvZLtMn\nsa0GnPYGFbSwJ6Lzel5J4P1u\n-----END PRIVATE KEY-----\n";
+const GOOGLE_SPREADSHEET_ID = "1qLbGODHXXYdyIFR3TA6yKadnTWAmpvj7-6sOpQkKCS4";
 
 async function populateGoogleSheet() {
   const serviceAccountAuth = new JWT({
@@ -69,15 +72,27 @@ async function populateGoogleSheet() {
   // Get all existing sheet titles
   const existingSheets = doc.sheetsByTitle;
 
+  // Load the header row from the first sheet
+  const firstSheet = doc.sheetsByIndex[0];
+  await firstSheet.loadHeaderRow();
+  const firstSheetHeaders = firstSheet.headerValues || [];
+
+  // Load all rows and ensure they're fully loaded
+  const firstSheetRows = await firstSheet.getRows();
+  
+  // Get the header descriptions using the public get method
+  const headerDescriptions = firstSheetRows.length > 0 
+    ? firstSheetHeaders.map(header => firstSheetRows[0].get(header))
+    : firstSheetHeaders;
+
+  console.log("Header descriptions:", headerDescriptions);
+
   // Create sheets for each team if they don't exist
   for (const team of teams) {
-    const sheetTitle = team.name;
+    const sheetTitle = team.customData ? team.customData.sheetName : team.name;
 
     if (!existingSheets[sheetTitle]) {
-      // Create new sheet
-      const sheet = await doc.addSheet({ title: sheetTitle });
-
-      // Get all questions from the team's elements, filtering out HTML and panel elements
+      // Get all questions to calculate required columns
       const questions = team.elements
         .flatMap((element: SurveyElement) => {
           if (element.type === "panel" && element.elements) {
@@ -90,18 +105,25 @@ async function populateGoogleSheet() {
           title: element.title || element.name,
         }));
 
-      // Add header rows
-      await sheet.setHeaderRow([
-        "Submission ID",
-        "Timestamp",
-        ...questions.map((q) => q.id),
-      ]);
+      // Calculate total columns needed
+      const totalColumns = firstSheetHeaders.length + questions.length;
 
-      await sheet.addRow([
-        "Submission ID",
-        "Timestamp",
-        ...questions.map((q) => q.title),
-      ]);
+      // Combine headers before creating sheet
+      const combinedHeaders = [...firstSheetHeaders, ...questions.map((q) => q.id)];
+
+      // Create new sheet with headers
+      const sheet = await doc.addSheet({ 
+        title: sheetTitle,
+        headerValues: combinedHeaders,
+        gridProperties: {
+          columnCount: totalColumns,
+          rowCount: 500
+        }
+      });
+
+      // Add the descriptions row
+      const combinedDescriptions = [...headerDescriptions, ...questions.map((q) => q.title)];
+      await sheet.addRow(combinedDescriptions);
 
       console.log(`Created sheet for ${sheetTitle}`);
     } else {
@@ -121,7 +143,7 @@ async function removeAllSheets() {
   });
 
   const doc = new GoogleSpreadsheet(
-    "1rzjK6gEzCbdawqCn9iXUM1B8x2spyesOz34-_4bCWWk",
+    "1qLbGODHXXYdyIFR3TA6yKadnTWAmpvj7-6sOpQkKCS4",
     serviceAccountAuth
   );
   await doc.loadInfo();
@@ -131,7 +153,7 @@ async function removeAllSheets() {
 
   for (const sheet of Object.values(existingSheets)) {
     // Only remove sheets that are not "General"
-    if (!["General"].includes(sheet.title)) {
+    if (!["General Information"].includes(sheet.title)) {
       await sheet.delete();
     }
   }
@@ -139,5 +161,5 @@ async function removeAllSheets() {
   console.log("All sheets have been removed!");
 }
 
-// removeAllSheets();
+//removeAllSheets();
 populateGoogleSheet();

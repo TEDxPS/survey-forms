@@ -1,7 +1,7 @@
 export const volunteer = {
     name: "志工管理 Volunteer Management",
     description: "志工管理 Volunteer Management",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Volunteer Management" },
     visibleIf: "{first_choice} = 'Volunteer Management'",
     elements: [
         {

@@ -1,7 +1,7 @@
 export const floorAndHall = {
     name: "外场 & 内场管理 Hall & Floor Management",
     description: "外场 & 内场管理 Hall & Floor Management",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Hall & Floor" },
     visibleIf: "{first_choice} = 'Hall & Floor'",
     elements: [
         {

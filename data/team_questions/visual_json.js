@@ -1,7 +1,7 @@
 export const visual = {
     name: "主视觉 - 平面/ 动画设计 Visual - Graphic/ Animation Design",
     description: "主视觉 - 平面/ 动画设计 Visual - Graphic/ Animation Design",
-    customData: { waitTime: 15 },
+    customData: { sheetName: "Visual" },
     visibleIf: "{first_choice} == 'Visual'",
     elements: [
         {
