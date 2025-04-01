@@ -168,9 +168,10 @@ export default function SurveyComponent() {
       setTimeout(() => startCountdownWithDOMAccess(), 50);
     }
   
-    const elements = document.getElementsByClassName("sd-description");
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
+    const descElements = document.getElementsByClassName("sd-description");
+    for (let i = 0; i < descElements.length; i++) {
+      const element = descElements[i];
+
       if (element.innerHTML.includes("pdf+button")) {
         const button = document.createElement("button");
   
@@ -203,6 +204,23 @@ export default function SurveyComponent() {
           );
         };
         element.parentNode?.replaceChild(button, element);
+      }
+    }
+
+    const labelElements = document.getElementsByClassName("sv-string-viewer");
+    for (let i = 0; i < labelElements.length; i++) {
+      const element = labelElements[i];
+      if (element.innerHTML.includes("\\")) {
+        element.innerHTML = element.innerHTML.replace("\\", "|");
+      }
+    }
+
+    const valueElements = document.getElementsByClassName("sd-item__control");
+    for (let i = 0; i < valueElements.length; i++) {
+      const element = valueElements[i] as HTMLInputElement;
+      if (element.value.includes("\\")) {
+        element.value = element.value.replace("\\", "|");
+        element.name = element.name.replace("\\", "|");
       }
     }
   });

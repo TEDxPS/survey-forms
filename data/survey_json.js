@@ -242,6 +242,7 @@ export const json = {
     production,
     logistic,
     interviewTimeA,
-    interviewTimeB
+    interviewTimeB,
+    wrappingUp,
   ],
 };

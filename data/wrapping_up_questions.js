@@ -14,28 +14,28 @@ export const wrappingUp = {
                     isRequired: true,
                     choices: [
                         {
-                            text: "Orientation Day - May 24, 2024|2024年5月24日迎新日",
-                            value: "2024年5月24日 | 迎新日"
+                            text: "Orientation Day - May 24, 2024 \\ 2024年5月24日 迎新日",
+                            value: "2024年5月24日 \\ 迎新日"
                         },
                         {
-                            text: "Pre-event Briefing Day - September 27, 2025 | 2025年9月27日 年会前简报日",
-                            value: "2025年9月27日 | 年会前简报日"
+                            text: "Pre-event Briefing Day - September 27, 2025 \\ 2025年9月27日 年会前简报日",
+                            value: "2025年9月27日 \\ 年会前简报日"
                         },
                         {
-                            text: "Rehearsal Day 1 - October 09, 2024 | 2024年10月09日 彩排日 第一天",
-                            value: "2024年10月09日 | 彩排日 第一天"
+                            text: "Rehearsal Day 1 - October 09, 2024 \\ 2024年10月09日 彩排日 第一天",
+                            value: "2024年10月09日 \\ 彩排日 第一天"
                         },
                         {
-                            text: "Rehearsal Day 2 - October 10, 2024 | 2024年10月10日 彩排日 第二天",
-                            value: "2024年10月10日 |  彩排日 第二天"
+                            text: "Rehearsal Day 2 - October 10, 2024 \\ 2024年10月10日 彩排日 第二天",
+                            value: "2024年10月10日 \\  彩排日 第二天"
                         },
                         {
-                            text: "Event Day - October 11, 2025 | 2025年10月11日 年会当日",
-                            value: "2025年10月11日 | 年会当日"
+                            text: "Event Day - October 11, 2025 \\ 2025年10月11日 年会当日",
+                            value: "2025年10月11日 \\ 年会当日"
                         },
                         {
-                            text: "Appreciation Dinner - October 18, 2025 | 2025年10月18日 庆功/感谢宴",
-                            value: "2025年10月18日 | 庆功/感谢宴"
+                            text: "Appreciation Dinner - October 18, 2025 \\ 2025年10月18日 庆功/感谢宴",
+                            value: "2025年10月18日 \\ 庆功/感谢宴"
                         },
                     ]
                 },
@@ -47,19 +47,19 @@ export const wrappingUp = {
                     isRequired: true,
                     choices: [
                         {
-                            label: "Klang Valley | 雪隆区",
+                            text: "Klang Valley | 雪隆区",
                             value: "雪隆区"
                         },
                         {
-                            label: "Peninsular Malaysia | 雪隆区之外（北南马）",
+                            text: "Peninsular Malaysia | 雪隆区之外（北南马）",
                             value: "雪隆区之外（北南马）"
                         },
                         {
-                            label: "East Malaysia | 东马",
+                            text: "East Malaysia | 东马",
                             value: "东马"
                         },
                         {
-                            label: "Overseas | 海外",
+                            text: "Overseas | 海外",
                             value: "海外"
                         }
                     ]
@@ -85,19 +85,19 @@ export const wrappingUp = {
                     isRequired: true,
                     choices: [
                         {
-                            label: "HAVE—DO—BE",
+                            text: "HAVE—DO—BE",
                             value: "HAVE—DO—BE"
                         },
                         {
-                            label: "DO—HAVE—BE",
+                            text: "DO—HAVE—BE",
                             value: "DO—HAVE—BE"
                         },
                         {
-                            label: "BE—DO—HAVE",
+                            text: "BE—DO—HAVE",
                             value: "BE—DO—HAVE"
                         },
                         {
-                            label: "I don't understand the mindset | 我不了解这个思维",
+                            text: "I don't understand the mindset | 我不了解这个思维",
                             value: "-"
                         }
                     ]
@@ -114,10 +114,10 @@ export const wrappingUp = {
                     description: "pdf+button",
                     isRequired: true,
                     choices: [
-                      "Peacock | 孔雀",
-                      "Dove | 鸽子",
-                      "Owl | 猫头鹰",
-                      "Eagle | 鹰",
+                      "Peacock \\ 孔雀",
+                      "Dove \\ 鸽子",
+                      "Owl \\ 猫头鹰",
+                      "Eagle \\ 鹰",
                     ]
                 },
                 {
