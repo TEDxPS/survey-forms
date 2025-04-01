@@ -1,56 +1,91 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
 import "survey-core/survey-core.css";
-import { useState } from "react";
 import { json } from "../../data/survey_json.js";
 import { surveyTheme } from "../../data/survey_theme_json.js";
 
 export default function SurveyComponent() {
   const [error, setError] = useState<string | null>(null);
+  const [surveyModel] = useState(() => new Model(json));
 
-  const model = new Model(json);
-  model.applyTheme(surveyTheme);
+  // Find the first_choice element which should be of type dropdown or radiogroup
+  // Ensure the element is of type dropdown or radiogroup before accessing choices
+  const firstChoiceQuestion = json.pages[0].elements.find(
+    (element) => element.name === "first_choice" && (element.type === "dropdown" || element.type === "radiogroup")
+  );
+  
+  const pages = firstChoiceQuestion && 'choices' in firstChoiceQuestion ? firstChoiceQuestion.choices : [];
+  console.log("Pages: ", pages);
 
-  model.onComplete.add(async (survey, options) => {
+
+  const COUNTDOWN_SECONDS = 15;
+  let countdownTimer: NodeJS.Timeout;
+  let countdownRemaining = COUNTDOWN_SECONDS;
+
+  function startCountdownWithDOMAccess() {
+    countdownRemaining = COUNTDOWN_SECONDS;
+
+    const nextBtn = document.querySelector<HTMLButtonElement>(".sd-navigation__next-btn");
+    if (!nextBtn) {
+      console.error("Next button not found");
+      return;
+    }
+
+    nextBtn.disabled = true;
+    nextBtn.value = `${countdownRemaining}s`;
+
+    countdownTimer = setInterval(() => {
+      countdownRemaining--;
+      if (nextBtn) {
+        if (countdownRemaining > 0) {
+          nextBtn.value = `${countdownRemaining}s`;
+        } else {
+          clearInterval(countdownTimer);
+          nextBtn.disabled = false;
+          nextBtn.value = "Next";
+        }
+      }
+    }, 1000);
+  }
+
+  surveyModel.applyTheme(surveyTheme);
+
+  surveyModel.onComplete.add(async (survey, options) => {
     options.showSaveInProgress();
-
     const enrichedData = { ...survey.data };
     const questions = survey.getAllQuestions();
-    
-    questions.forEach(question => {
+
+    questions.forEach((question) => {
       const value = survey.data[question.name];
       if (value) {
         if (question.choices) {
-          // Handle questions with choices
-          const choice = question.choices.find((c: { value: string; text: string }) => c.value === value);
+          const choice = question.choices.find(
+            (c: { value: string; text: string }) => c.value === value
+          );
           if (choice) {
             enrichedData[question.name] = {
               value: choice.value,
               question_title: question.title,
-              answer_text: choice.text
+              answer_text: choice.text,
             };
           }
         } else {
-          // Handle questions without choices (text, email, etc.)
           enrichedData[question.name] = {
-            value: value,
+            value,
             question_title: question.title,
-            answer_text: value
+            answer_text: value,
           };
         }
       }
     });
 
-    console.log("Enriched Survey data: ", enrichedData);
-
     try {
       const response = await fetch("/api/recruitment/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(enrichedData),
       });
 
@@ -70,34 +105,9 @@ export default function SurveyComponent() {
     }
   });
 
-  /* Render PDF Button */
-  model.onAfterRenderPage.add(() => {
-    const elements = document.getElementsByClassName("sd-description");
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
-      if (element.innerHTML.includes("pdf+button")) {
-        const button = document.createElement("button");
-
-        for (const attr of Array.from(element.attributes)) {
-          button.setAttribute(attr.name, attr.value);
-        }
-
-        button.className = "text-[#eb0028] underline";
-        button.innerHTML = "Click here to take test";
-        button.onclick = () => {
-          window.open("https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing", "_blank");
-        };
-        element.parentNode?.replaceChild(button, element);
-      }
-    }
-  });
-
-  /* File upload function */
-  model.onUploadFiles.add(async (_, options) => {
+  surveyModel.onUploadFiles.add(async (_, options) => {
     const formData = new FormData();
-    options.files.forEach((file) => {
-      formData.append("file", file);
-    });
+    options.files.forEach((file) => formData.append("file", file));
 
     try {
       const response = await fetch("/api/recruitment/upload", {
@@ -106,38 +116,26 @@ export default function SurveyComponent() {
       });
 
       const data = await response.json();
-      console.log("Data: ", data);
+      if (!response.ok) throw new Error(data.message || "Upload failed");
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to upload files");
-      }
-
-      console.log("Success: ", data);
       options.callback(
-        options.files.map((file) => {
-          return {
-            file: file,
-            content: data["fileUrl"],
-          };
-        })
+        options.files.map((file) => ({
+          file,
+          content: data["fileUrl"],
+        }))
       );
     } catch (e) {
-      console.error("Error on upload file: ", error);
+      console.error("Upload error: ", e);
       options.callback([], ["An error occurred during file upload."]);
     }
   });
 
-  model.onDownloadFile.add(async (_, options) => {
+  surveyModel.onDownloadFile.add(async (_, options) => {
     try {
       const response = await fetch(options.content);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to download file");
-      }
+      if (!response.ok) throw new Error("Download failed");
 
       const blob = await response.blob();
-
       const file = new File([blob], options.fileValue.name, {
         type: options.fileValue.type,
       });
@@ -148,26 +146,68 @@ export default function SurveyComponent() {
       };
       reader.readAsDataURL(file);
     } catch (e) {
-      console.error("Error on get file: ", error);
+      console.error("Download error: ", e);
       options.callback("error");
     }
   });
 
+  surveyModel.onAfterRenderPage.add((sender) => {
+    const currentPageName = sender.currentPage?.name;
+  
+    // Ensure pages is defined and handle both string and object cases
+    const matchedPage = pages && pages.find(page => {
+      if (typeof page === 'string') {
+        return page.includes(currentPageName);
+      } else if (typeof page === 'object' && 'text' in page) {
+        return page.text.includes(currentPageName);
+      }
+      return false;
+    });
+  
+    if (matchedPage) {
+      setTimeout(() => startCountdownWithDOMAccess(), 50);
+    }
+  
+    const elements = document.getElementsByClassName("sd-description");
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if (element.innerHTML.includes("pdf+button")) {
+        const button = document.createElement("button");
+  
+        for (const attr of Array.from(element.attributes)) {
+          button.setAttribute(attr.name, attr.value);
+        }
+  
+        button.className = "text-[#eb0028] underline";
+        button.innerHTML = "Click here to take test";
+        button.onclick = () => {
+          window.open(
+            "https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing",
+            "_blank"
+          );
+        };
+        element.parentNode?.replaceChild(button, element);
+      }
+    }
+  });
+
+  useEffect(() => {
+    return () => {
+      if (countdownTimer) clearInterval(countdownTimer);
+    };
+  }, []);
+
   return !error ? (
-    <Survey model={model} />
+    <Survey model={surveyModel} />
   ) : (
-    <>
-      {error && (
-        <div className="w-full text-center space-y-2 py-3 bg-[#1c1c1c]">
-          <p className="font-bold text-white text-2xl">{error}</p>
-          <button
-            onClick={() => setError(null)}
-            className="text-sm bg-white p-2 rounded"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-    </>
+    <div className="w-full text-center space-y-2 py-3 bg-[#1c1c1c]">
+      <p className="font-bold text-white text-2xl">{error}</p>
+      <button
+        onClick={() => setError(null)}
+        className="text-sm bg-white p-2 rounded"
+      >
+        Dismiss
+      </button>
+    </div>
   );
 }
