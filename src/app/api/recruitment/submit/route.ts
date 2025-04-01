@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       key,
       typeof value === 'object' && value !== null
         ? Array.isArray(value)
-          ? value.map(v => v.content || v.value || v).join(", ")
+          ? value.map(v => v.content || v.value || v).join(String.fromCharCode(10))
           : 'value' in value
             ? value.value
             : String(value)
@@ -68,10 +68,19 @@ export async function POST(req: Request) {
     Object.entries(processedData).map(([key, value]) => [
       key,
       Array.isArray(value)
-        ? value.map(v => typeof v === 'object' && v !== null ? v.content : v).join(", ")
+        ? value.map(v => typeof v === 'object' && v !== null ? v.content : v).join(",")
         : String(value)
     ])
   ) as { [key: string]: string };
+
+  // Add Submission ID and Timestamp
+  const now = new Date();
+  const malaysiaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // Convert to GMT+8
+  
+  sheetData["Submission ID"] = now.getTime().toString();
+  sheetData["Timestamp"] = malaysiaTime.toISOString().replace('T', ' ').slice(0, 19);
+
+  console.log('Sheet Data: ', sheetData);
 
   const sheet = doc.sheetsByIndex[0]; // or use `doc.sheetsById[id]` or `doc.sheetsByTitle[title]`
   await sheet.addRow(sheetData);
