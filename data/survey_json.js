@@ -17,6 +17,7 @@ import { volunteer } from "./team_questions/volunteer_json.js";
 import { interviewTimeA } from "./interview_time_group_a_json.js";
 import { interviewTimeB } from "./interview_time_group_b_json.js";
 import { wrappingUp } from "./wrapping_up_questions.js";
+import { knowMoreQuestions } from "./know_more_questions.js";
 
 export const json = {
   title: "TEDxPetalingStreet Volunteer Application | TEDxPetalingStreet 志工申请表",
@@ -244,5 +245,6 @@ export const json = {
     interviewTimeA,
     interviewTimeB,
     wrappingUp,
+    knowMoreQuestions,
   ],
 };
