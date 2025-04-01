@@ -36,3 +36,4 @@ yarn-error.log*
 next-env.d.ts
 
 google-services.json
+scripts/populateGoogleSheet.js
