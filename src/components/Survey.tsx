@@ -187,6 +187,22 @@ export default function SurveyComponent() {
           );
         };
         element.parentNode?.replaceChild(button, element);
+      } else if (element.innerHTML.includes("jd+button")) {
+        const button = document.createElement("button");
+  
+        for (const attr of Array.from(element.attributes)) {
+          button.setAttribute(attr.name, attr.value);
+        }
+  
+        button.className = "text-[#eb0028] underline";
+        button.innerHTML = "Click here to understand the job description";
+        button.onclick = () => {
+          window.open(
+            "https://docs.google.com/file/d/1y2FFqjF7_62Vg_c_Z61Y9FVIlN2HYqCy/edit?filetype=msword",
+            "_blank"
+          );
+        };
+        element.parentNode?.replaceChild(button, element);
       }
     }
   });

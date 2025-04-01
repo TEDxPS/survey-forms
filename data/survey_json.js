@@ -82,33 +82,33 @@ export const json = {
             }
           ]
         },
-        {
-          type: "panel",
-          name: "proficiency_panel",
-          elements: [
-            {
-              type: "html",
-              name: "proficiency_desc",
-              html: "<div style=\"font-weight:600;\">Chinese/Mandarin Proficiency |  中文阅读/书写水平 </div>\n<ul style=\"list-style-type:disc;margin-left:20px;\">\n<li>We recommend answering all questions in Mandarin. However, an English version is available.\n</li>\n<li>尽管我们希望您用中文回答，但如果您更擅长用英文表达自己，欢迎您使用英文版表格回答！</li>\n</ul>"
-            }
-          ]
-        },
-        {
-          type: "radiogroup",
-          name: "language_preference",
-          title: "Can you read and write in Mandarin? | 请问您可以阅读及书写中文吗？",
-          isRequired: true,
-          choices: [
-            {
-              value: "mandarin",
-              text: "I would prefer answer in Mandarin | 我可以理解及使用中文回答"
-            },
-            {
-              value: "english",
-              text: "I would prefer an English respond | 我想使用英文版表格进行回答"
-            }
-          ],
-        },
+        // {
+        //   type: "panel",
+        //   name: "proficiency_panel",
+        //   elements: [
+        //     {
+        //       type: "html",
+        //       name: "proficiency_desc",
+        //       html: "<div style=\"font-weight:600;\">Chinese/Mandarin Proficiency |  中文阅读/书写水平 </div>\n<ul style=\"list-style-type:disc;margin-left:20px;\">\n<li>We recommend answering all questions in Mandarin. However, an English version is available.\n</li>\n<li>尽管我们希望您用中文回答，但如果您更擅长用英文表达自己，欢迎您使用英文版表格回答！</li>\n</ul>"
+        //     }
+        //   ]
+        // },
+        // {
+        //   type: "radiogroup",
+        //   name: "language_preference",
+        //   title: "Can you read and write in Mandarin? | 请问您可以阅读及书写中文吗？",
+        //   isRequired: true,
+        //   choices: [
+        //     {
+        //       value: "mandarin",
+        //       text: "I would prefer answer in Mandarin | 我可以理解及使用中文回答"
+        //     },
+        //     {
+        //       value: "english",
+        //       text: "I would prefer an English respond | 我想使用英文版表格进行回答"
+        //     }
+        //   ],
+        // },
         {
           type: "panel",
           name: "career_panel",
@@ -164,6 +164,7 @@ export const json = {
           type: "dropdown",
           name: "first_choice",
           title: "[FIRST CHOICE] In which group do you wish to join? | 【第一选择】 想要加入的志工组别",
+          description: "jd+button",
           isRequired: true,
           validators: [
             {
@@ -241,7 +242,6 @@ export const json = {
     production,
     logistic,
     interviewTimeA,
-    interviewTimeB,
-    wrappingUp
+    interviewTimeB
   ],
 };

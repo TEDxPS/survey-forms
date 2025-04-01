@@ -10,36 +10,31 @@ export const wrappingUp = {
                     type: "checkbox",
                     name: "availability",
                     title: "Are you able to attend any of the events below? (You may choose more than one) | 以下的活动日期，您方便吗？（ 多项选择 ）",
-                    description: `
-                    These are the important events that we hope to see everyone attend.
-                    You can discuss the contribution time for each group in the interview.
-
-                    以下是我们所有人都期待发生的重要事件。
-至于各个组别要求的贡献时间，可在面试中讨论。`,
+                    description: `These are the important events that we hope to see everyone attend. You can discuss the contribution time for each group in the interview.\n以下是我们所有人都期待发生的重要事件。至于各个组别要求的贡献时间，可在面试中讨论。`,
                     isRequired: true,
                     choices: [
                         {
-                            label: "Orientation Day - May 24, 2024 | 2024年5月24日 迎新日",
+                            text: "Orientation Day - May 24, 2024|2024年5月24日迎新日",
                             value: "2024年5月24日 | 迎新日"
                         },
                         {
-                            label: "Pre-event Briefing Day - September 27, 2025 | 2025年9月27日 年会前简报日",
+                            text: "Pre-event Briefing Day - September 27, 2025 | 2025年9月27日 年会前简报日",
                             value: "2025年9月27日 | 年会前简报日"
                         },
                         {
-                            label: "Rehearsal Day 1 - October 09, 2024 | 2024年10月09日 彩排日 第一天",
+                            text: "Rehearsal Day 1 - October 09, 2024 | 2024年10月09日 彩排日 第一天",
                             value: "2024年10月09日 | 彩排日 第一天"
                         },
                         {
-                            label: "Rehearsal Day 2 - October 10, 2024 | 2024年10月10日 彩排日 第二天",
+                            text: "Rehearsal Day 2 - October 10, 2024 | 2024年10月10日 彩排日 第二天",
                             value: "2024年10月10日 |  彩排日 第二天"
                         },
                         {
-                            label: "Event Day - October 11, 2025 | 2025年10月11日 年会当日",
+                            text: "Event Day - October 11, 2025 | 2025年10月11日 年会当日",
                             value: "2025年10月11日 | 年会当日"
                         },
                         {
-                            label: "Appreciation Dinner - October 18, 2025 | 2025年10月18日 庆功/感谢宴",
+                            text: "Appreciation Dinner - October 18, 2025 | 2025年10月18日 庆功/感谢宴",
                             value: "2025年10月18日 | 庆功/感谢宴"
                         },
                     ]
@@ -86,7 +81,7 @@ export const wrappingUp = {
                     type: "radiogroup",
                     name: "mindset_choice",
                     title: "Which mindset theory resonates with you the most? | 以下哪个思维理论更贴切您？",
-                    description: "Not familiar with these mindset theories? <a href='https://www.mindbodygreen.com/articles/be-do-have-model' target='_blank'>Click here to learn more</a> | 不了解这些思维理论？<a href='https://www.mindbodygreen.com/articles/be-do-have-model' target='_blank'>点击这里了解更多</a>",
+                    // description: "Not familiar with these mindset theories? <a href='https://www.mindbodygreen.com/articles/be-do-have-model' target='_blank'>Click here to learn more</a> | 不了解这些思维理论？<a href='https://www.mindbodygreen.com/articles/be-do-have-model' target='_blank'>点击这里了解更多</a>",
                     isRequired: true,
                     choices: [
                         {
@@ -100,14 +95,17 @@ export const wrappingUp = {
                         {
                             label: "BE—DO—HAVE",
                             value: "BE—DO—HAVE"
+                        },
+                        {
+                            label: "I don't understand the mindset | 我不了解这个思维",
+                            value: "-"
                         }
                     ]
                 },
                 {
                     type: "text",
                     name: "mindset_choice_explanation",
-                    title: "Please briefly explain your choice for the previous question | 请简要说明您在上个问题的选择原因",
-                    isRequired: true,
+                    title: "Please briefly explain your choice for the previous question | 请简要说明您在上个问题的选择原因"
                 },
                 {
                     type: "radiogroup",
@@ -126,7 +124,6 @@ export const wrappingUp = {
                     type: "comment",
                     name: "message_to_world",
                     title: "If you could send one message to everyone on Earth, what would you say and why? | 如果您可以给地球上的所有人发一条短信，您会写什么？ 为什么？",
-                    isRequired: true,
                 },
                 {
                     type: "comment",
