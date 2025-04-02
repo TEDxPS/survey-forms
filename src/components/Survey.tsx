@@ -218,59 +218,6 @@ export default function SurveyComponent() {
         if (matchedPage) {
           requestAnimationFrame(() => startCountdownWithDOMAccess());
         }
-
-        // Handle special buttons
-        const descElements = Array.from(document.getElementsByClassName("sd-description"));
-        descElements.forEach((element) => {
-          if (!(element instanceof HTMLElement)) return;
-
-          const createCustomButton = (
-            buttonText: string,
-            url: string,
-            className = "text-[#eb0028] underline"
-          ) => {
-            const button = document.createElement("button");
-            Array.from(element.attributes).forEach((attr) => {
-              button.setAttribute(attr.name, attr.value);
-            });
-            button.className = className;
-            button.innerHTML = buttonText;
-            button.onclick = () => window.open(url, "_blank");
-            return button;
-          };
-
-          if (element.innerHTML.includes("pdf+button")) {
-            const button = createCustomButton(
-              "Click here to take test",
-              "https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing"
-            );
-            element.parentNode?.replaceChild(button, element);
-          } else if (element.innerHTML.includes("jd+button")) {
-            const button = createCustomButton(
-              "Click here to understand the job description",
-              "https://docs.google.com/file/d/1y2FFqjF7_62Vg_c_Z61Y9FVIlN2HYqCy/edit?filetype=msword"
-            );
-            element.parentNode?.replaceChild(button, element);
-          }
-        });
-
-        // Handle character replacements
-        const replaceCharInElements = (selector: string, from: string, to: string) => {
-          const elements = Array.from(document.getElementsByClassName(selector));
-          elements.forEach((element) => {
-            if (element instanceof HTMLElement && element.innerHTML.includes(from)) {
-              element.innerHTML = element.innerHTML.replace(from, to);
-            }
-            if (element instanceof HTMLInputElement && element.value.includes(from)) {
-              element.value = element.value.replace(from, to);
-              element.name = element.name.replace(from, to);
-            }
-          });
-        };
-
-        replaceCharInElements("sv-string-viewer", "\\", "|");
-        replaceCharInElements("sd-item__control", "\\", "|");
-
       } catch (error) {
         console.error("Error in handleRender:", error);
       }
@@ -300,11 +247,66 @@ export default function SurveyComponent() {
       }
     };
 
+    const handleElementRerendered = () => {
+      // Handle special buttons
+      const descElements = Array.from(document.getElementsByClassName("sd-description"));
+      descElements.forEach((element) => {
+        if (!(element instanceof HTMLElement)) return;
+
+        const createCustomButton = (
+          buttonText: string,
+          url: string,
+          className = "text-[#eb0028] underline"
+        ) => {
+          const button = document.createElement("button");
+          Array.from(element.attributes).forEach((attr) => {
+            button.setAttribute(attr.name, attr.value);
+          });
+          button.className = className;
+          button.innerHTML = buttonText;
+          button.onclick = () => window.open(url, "_blank");
+          return button;
+        };
+
+        if (element.innerHTML.includes("pdf+button")) {
+          const button = createCustomButton(
+            "Click here to take test",
+            "https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing"
+          );
+          element.parentNode?.replaceChild(button, element);
+        } else if (element.innerHTML.includes("jd+button")) {
+          const button = createCustomButton(
+            "Click here to understand the job description",
+            "https://docs.google.com/file/d/1y2FFqjF7_62Vg_c_Z61Y9FVIlN2HYqCy/edit?filetype=msword"
+          );
+          element.parentNode?.replaceChild(button, element);
+        }
+      });
+
+      // Handle character replacements
+      const replaceCharInElements = (selector: string, from: string, to: string) => {
+        const elements = Array.from(document.getElementsByClassName(selector));
+        elements.forEach((element) => {
+          if (element instanceof HTMLElement && element.innerHTML.includes(from)) {
+            element.innerHTML = element.innerHTML.replace(from, to);
+          }
+          if (element instanceof HTMLInputElement && element.value.includes(from)) {
+            element.value = element.value.replace(from, to);
+            element.name = element.name.replace(from, to);
+          }
+        });
+      };
+
+      replaceCharInElements("sv-string-viewer", "\\", "|");
+      replaceCharInElements("sd-item__control", "\\", "|");
+    };
+
     // Register handlers
     surveyModel.onComplete.add(handleComplete);
     surveyModel.onUploadFiles.add(handleUpload);
     surveyModel.onDownloadFile.add(handleDownload);
     surveyModel.onAfterRenderPage.add(handleRender);
+    surveyModel.onElementRerendered?.add(handleElementRerendered);
     surveyModel.onServerValidateQuestions.add(handleServerValidateQuestions);
 
     // Cleanup
@@ -314,6 +316,7 @@ export default function SurveyComponent() {
       surveyModel.onUploadFiles.remove(handleUpload);
       surveyModel.onDownloadFile.remove(handleDownload);
       surveyModel.onAfterRenderPage.remove(handleRender);
+      surveyModel.onElementRerendered?.remove(handleElementRerendered);
       surveyModel.onServerValidateQuestions.remove(handleServerValidateQuestions);
     };
   }, [isSubmitting, pages, surveyModel]);
