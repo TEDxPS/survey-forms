@@ -3,7 +3,7 @@ const SurveyComponent = dynamic(() => import("@/components/Survey"), { ssr: fals
 import Image from 'next/image';
 import type { Metadata } from 'next'
 
-export const keywords = [
+const keywords = [
   'TEDx',
   'TED',
   'TED Talk',
@@ -28,7 +28,7 @@ export const keywords = [
   'Transformative ideas'
 ]
 
-export const authors = [
+const authors = [
   { name: 'TEDxPetalingStreet Info Tech Team' }
 ]
 
