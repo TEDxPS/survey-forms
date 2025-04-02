@@ -19,7 +19,10 @@ interface FileValue {
 
 interface UploadOptions {
   files: File[];
-  callback: (files: { file: File; content: string }[], errors?: string[]) => void;
+  callback: (
+    files: { file: File; content: string }[],
+    errors?: string[]
+  ) => void;
 }
 
 interface DownloadOptions {
@@ -44,18 +47,25 @@ export default function SurveyComponent() {
   });
 
   const firstChoiceQuestion = json.pages[0].elements.find(
-    (element) => element.name === "first_choice" && (element.type === "dropdown" || element.type === "radiogroup")
+    (element) =>
+      element.name === "first_choice" &&
+      (element.type === "dropdown" || element.type === "radiogroup")
   );
-  
-  const pages = firstChoiceQuestion && 'choices' in firstChoiceQuestion ? firstChoiceQuestion.choices : [];
-  
+
+  const pages =
+    firstChoiceQuestion && "choices" in firstChoiceQuestion
+      ? firstChoiceQuestion.choices
+      : [];
+
   const COUNTDOWN_SECONDS = 15;
   let countdownTimer: NodeJS.Timeout;
   let countdownRemaining = COUNTDOWN_SECONDS;
 
   function startCountdownWithDOMAccess() {
     countdownRemaining = COUNTDOWN_SECONDS;
-    const nextBtn = document.querySelector<HTMLButtonElement>(".sd-navigation__next-btn");
+    const nextBtn = document.querySelector<HTMLButtonElement>(
+      ".sd-navigation__next-btn"
+    );
     if (!nextBtn) {
       console.error("Next button not found");
       return;
@@ -80,9 +90,12 @@ export default function SurveyComponent() {
 
   useEffect(() => {
     // Define handlers
-    const handleComplete = async (survey: SurveyModel, options: CompleteOptions) => {
+    const handleComplete = async (
+      survey: SurveyModel,
+      options: CompleteOptions
+    ) => {
       if (isSubmitting) return;
-      
+
       try {
         setIsSubmitting(true);
         options.showSaveInProgress();
@@ -128,7 +141,9 @@ export default function SurveyComponent() {
         setError(null);
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "An unexpected error occurred";
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred";
         console.error("Failed to save survey results:", error);
         setError(errorMessage);
         options.showSaveError();
@@ -174,7 +189,7 @@ export default function SurveyComponent() {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-          options.callback("success", e.target?.result as string || "");
+          options.callback("success", (e.target?.result as string) || "");
         };
         reader.readAsDataURL(file);
       } catch (e) {
@@ -184,75 +199,104 @@ export default function SurveyComponent() {
     };
 
     const handleRender = (sender: SurveyModel) => {
-      const currentPageName = sender.currentPage?.name;
-    
-      const matchedPage = pages && pages.find(page => {
-        if (typeof page === 'string') {
-          return page.includes(currentPageName);
-        } else if (typeof page === 'object' && 'text' in page) {
-          return page.text.includes(currentPageName);
+      try {
+        const currentPageName = sender.currentPage?.name;
+        if (!currentPageName) {
+          console.warn('Current page name is undefined');
+          return;
         }
-        return false;
-      });
-    
-      if (matchedPage) {
-        setTimeout(() => startCountdownWithDOMAccess(), 50);
-      }
-    
-      const descElements = document.getElementsByClassName("sd-description");
-      for (let i = 0; i < descElements.length; i++) {
-        const element = descElements[i];
 
-        if (element.innerHTML.includes("pdf+button")) {
-          const button = document.createElement("button");
-    
-          for (const attr of Array.from(element.attributes)) {
-            button.setAttribute(attr.name, attr.value);
+        // Handle countdown timer
+        const matchedPage = pages?.find((page) => {
+          if (!page) return false;
+          if (typeof page === "string") {
+            return page.includes(currentPageName);
           }
-    
-          button.className = "text-[#eb0028] underline";
-          button.innerHTML = "Click here to take test";
-          button.onclick = () => {
-            window.open(
-              "https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing",
-              "_blank"
-            );
+          return "text" in page && page.text.includes(currentPageName);
+        });
+
+        if (matchedPage) {
+          requestAnimationFrame(() => startCountdownWithDOMAccess());
+        }
+
+        // Handle special buttons
+        const descElements = Array.from(document.getElementsByClassName("sd-description"));
+        descElements.forEach((element) => {
+          if (!(element instanceof HTMLElement)) return;
+
+          const createCustomButton = (
+            buttonText: string,
+            url: string,
+            className = "text-[#eb0028] underline"
+          ) => {
+            const button = document.createElement("button");
+            Array.from(element.attributes).forEach((attr) => {
+              button.setAttribute(attr.name, attr.value);
+            });
+            button.className = className;
+            button.innerHTML = buttonText;
+            button.onclick = () => window.open(url, "_blank");
+            return button;
           };
-          element.parentNode?.replaceChild(button, element);
-        } else if (element.innerHTML.includes("jd+button")) {
-          const button = document.createElement("button");
-    
-          for (const attr of Array.from(element.attributes)) {
-            button.setAttribute(attr.name, attr.value);
+
+          if (element.innerHTML.includes("pdf+button")) {
+            const button = createCustomButton(
+              "Click here to take test",
+              "https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing"
+            );
+            element.parentNode?.replaceChild(button, element);
+          } else if (element.innerHTML.includes("jd+button")) {
+            const button = createCustomButton(
+              "Click here to understand the job description",
+              "https://docs.google.com/file/d/1y2FFqjF7_62Vg_c_Z61Y9FVIlN2HYqCy/edit?filetype=msword"
+            );
+            element.parentNode?.replaceChild(button, element);
           }
-    
-          button.className = "text-[#eb0028] underline";
-          button.innerHTML = "Click here to understand the job description";
-          button.onclick = () => {
-            window.open(
-              "https://docs.google.com/file/d/1y2FFqjF7_62Vg_c_Z61Y9FVIlN2HYqCy/edit?filetype=msword",
-              "_blank"
-            );
-          };
-          element.parentNode?.replaceChild(button, element);
-        }
+        });
+
+        // Handle character replacements
+        const replaceCharInElements = (selector: string, from: string, to: string) => {
+          const elements = Array.from(document.getElementsByClassName(selector));
+          elements.forEach((element) => {
+            if (element instanceof HTMLElement && element.innerHTML.includes(from)) {
+              element.innerHTML = element.innerHTML.replace(from, to);
+            }
+            if (element instanceof HTMLInputElement && element.value.includes(from)) {
+              element.value = element.value.replace(from, to);
+              element.name = element.name.replace(from, to);
+            }
+          });
+        };
+
+        replaceCharInElements("sv-string-viewer", "\\", "|");
+        replaceCharInElements("sd-item__control", "\\", "|");
+
+      } catch (error) {
+        console.error("Error in handleRender:", error);
+      }
+    };
+
+    const handleServerValidateQuestions = async (_: any, { data, errors, complete }: { data: Record<string, any>; errors: Record<string, string>; complete: () => void }) => {
+      const email = data["email"];
+      if(!email || errors["email"]){
+        complete();
+        return;
       }
 
-      const labelElements = document.getElementsByClassName("sv-string-viewer");
-      for (let i = 0; i < labelElements.length; i++) {
-        const element = labelElements[i];
-        if (element.innerHTML.includes("\\")) {
-          element.innerHTML = element.innerHTML.replace("\\", "|");
-        }
-      }
+      try {
+        const response = await fetch("/api/recruitment/check-unique?email=" + email);
 
-      const valueElements = document.getElementsByClassName("sd-item__control");
-      for (let i = 0; i < valueElements.length; i++) {
-        const element = valueElements[i] as HTMLInputElement;
-        if (element.value.includes("\\")) {
-          element.value = element.value.replace("\\", "|");
-          element.name = element.name.replace("\\", "|");
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Upload failed");
+
+        if (!data.isUnique) {
+          errors["email"] = "Email is already used";
         }
+      } catch (e) {
+        console.error("Validate error: ", e);
+      } finally {
+        complete();
+        return;
       }
     };
 
@@ -261,6 +305,7 @@ export default function SurveyComponent() {
     surveyModel.onUploadFiles.add(handleUpload);
     surveyModel.onDownloadFile.add(handleDownload);
     surveyModel.onAfterRenderPage.add(handleRender);
+    surveyModel.onServerValidateQuestions.add(handleServerValidateQuestions);
 
     // Cleanup
     return () => {
@@ -269,6 +314,7 @@ export default function SurveyComponent() {
       surveyModel.onUploadFiles.remove(handleUpload);
       surveyModel.onDownloadFile.remove(handleDownload);
       surveyModel.onAfterRenderPage.remove(handleRender);
+      surveyModel.onServerValidateQuestions.remove(handleServerValidateQuestions);
     };
   }, [isSubmitting, pages, surveyModel]);
 
