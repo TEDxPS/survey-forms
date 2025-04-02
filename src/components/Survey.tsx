@@ -270,13 +270,13 @@ export default function SurveyComponent() {
 
         if (element.innerHTML.includes("pdf+button")) {
           const button = createCustomButton(
-            "Click here to take test",
+            "Click here to take the DOPE Personality Test | 点这里进行您的DOPE人格测试",
             "https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing"
           );
           element.parentNode?.replaceChild(button, element);
         } else if (element.innerHTML.includes("jd+button")) {
           const button = createCustomButton(
-            "Click here to understand the job description",
+            "Click here to read job scope of all teams | 点这里阅读所有小组的职责范畴",
             "https://docs.google.com/file/d/1y2FFqjF7_62Vg_c_Z61Y9FVIlN2HYqCy/edit?filetype=msword"
           );
           element.parentNode?.replaceChild(button, element);

@@ -24,6 +24,16 @@ export const json = {
   showQuestionNumbers: "onPage",
   showPreviewBeforeComplete: true,
   previewMode: "answeredQuestions",
+  completedHtml: `<div class="w-[90%] md:w-[65%] mx-auto text-center pb-8"><h3>This form has come to an end! Thank you for your time. </h3>
+    <p>By completing the registration form, you acknowledge and consent to the collection, usage, and/or disclosure of your personal information, as necessary for your participation in our volunteer program. </p>
+    <p>Only candidates who have been shortlisted will be notified.  Best of luck!</p>
+    <br />
+    <h3>恭喜您完成了报名！我们诚心感谢您的时间还有用心!   </h3>
+    <ul class="list-none p-0">
+      <li>提交此表格表示您得知并同意，在参与我们的志工计划所必要的情况下，您的个资将被收集、使用和/或披露。</li>
+      <li>只有入围者会收到线下面试通知！ 祝您好运！</li>
+    </ul></div>
+    `,
   pages: [
     {
       name: "Personal Information | 个人信息",
