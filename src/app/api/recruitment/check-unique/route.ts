@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 
     try {
         await dbConnect();
-        const existedForm = await FormSubmission.findOne({ 'data.email': email });
+        const existedForm = await FormSubmission.findOne({ 'data.email.value': email });
 
         return Response.json({
             success: true,

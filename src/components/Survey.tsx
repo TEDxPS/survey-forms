@@ -237,7 +237,7 @@ export default function SurveyComponent() {
         if (!response.ok) throw new Error(data.message || "Upload failed");
 
         if (!data.isUnique) {
-          errors["email"] = "Email is already used";
+          errors["email"] = "You have previously submitted an application using this email, please use another one.";
         }
       } catch (e) {
         console.error("Validate error: ", e);
