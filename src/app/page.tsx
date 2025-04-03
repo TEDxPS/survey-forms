@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     siteName: 'TEDxPetalingStreet Volunteer Application | Ideas Change Everything',
     images: [
       {
-        url: 'https://recruitment.tedxpetalingstreet.com/tedxps_log.png',
+        url: 'https://recruitment.tedxpetalingstreet.com/tedx-hero.png',
         width: 1200,
         height: 630,
         alt: 'TEDxPetalingStreet Main Image',
