@@ -45,16 +45,34 @@ export const knowMoreQuestions = {
             description: "pdf+button",
             isRequired: true,
             choices: [
-              "Peacock \\ 孔雀",
-              "Dove \\ 鸽子",
-              "Owl \\ 猫头鹰",
-              "Eagle \\ 鹰",
+                "Peacock \\ 孔雀",
+                "Dove \\ 鸽子",
+                "Owl \\ 猫头鹰",
+                "Eagle \\ 鹰",
             ]
         },
         {
             type: "comment",
             name: "message_to_world",
             title: "If you could send one message to everyone on Earth, what would you say and why? | 如果您可以给地球上的所有人发一条短信，您会写什么？ 为什么？",
+        }, {
+
+            type: "radiogroup",
+            name: "recruitment_channel",
+            title: "Where did you hear about the 2025 recruitment? | 您是从哪里得知 2025 招募信息的？",
+            isRequired: true,
+            showOtherItem: true,
+            otherText: "Others (其他，请填写)",
+            choices: [
+                "Facebook (FB)", 
+                "Instagram (IG)", 
+                "Official Website (官网)", 
+                "Friends & Family (亲朋好友)", 
+                "Xiaohongshu (XHS) (小红书)", 
+                "YouTube (优管)", 
+                "Official Offline Events (官方线下活动，如年会 / 体验工坊)",
+            ],
+
         },
         {
             type: "comment",
