@@ -256,7 +256,7 @@ export default function SurveyComponent() {
         const createCustomButton = (
           buttonText: string,
           url: string,
-          className = "text-[#eb0028] underline"
+          className = "text-[#eb0028] underline whitespace-normal text-left break-words max-w-full"
         ) => {
           const button = document.createElement("button");
           Array.from(element.attributes).forEach((attr) => {
