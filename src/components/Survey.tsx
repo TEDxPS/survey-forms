@@ -277,7 +277,7 @@ export default function SurveyComponent() {
         } else if (element.innerHTML.includes("jd+button")) {
           const button = createCustomButton(
             "Click here to read job scope of all teams | 点这里阅读所有小组的职责范畴",
-            "https://docs.google.com/file/d/1y2FFqjF7_62Vg_c_Z61Y9FVIlN2HYqCy/edit?filetype=msword"
+            "https://drive.google.com/file/d/1cyHAvG0i5cNjVl-Sq3lusMCjm0rLIvro/view?usp=drive_link"
           );
           element.parentNode?.replaceChild(button, element);
         }
