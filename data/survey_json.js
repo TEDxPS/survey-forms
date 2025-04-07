@@ -164,7 +164,7 @@ export const json = {
         {
           type: "dropdown",
           name: "preferred_tedxps",
-          title: "Which one below can better describe your preference of joining us as volunteer in TEDxPetalingStreet ? | 您希望加入TEDxPetalingStreet的主要原因是什么？",
+          title: "Which of the following best describes your motivation for volunteering with TEDxPetalingStreet? | 以下哪一项最符合您希望成为志工的原因或期待？",
           isRequired: true,
           choices: [
             { value: "experienced", text: "I want to join a role that is more relevant to what I studied/ I am working | 我想要参与和我的【学业】/【工作】领域有关系的组别为志工" },
