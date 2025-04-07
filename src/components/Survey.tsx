@@ -248,57 +248,66 @@ export default function SurveyComponent() {
     };
 
     const handleElementRerendered = () => {
-      // Handle special buttons
-      const descElements = Array.from(document.getElementsByClassName("sd-description"));
-      descElements.forEach((element) => {
-        if (!(element instanceof HTMLElement)) return;
+      requestAnimationFrame(() => {
+        // Handle special buttons
+        const descElements = Array.from(document.getElementsByClassName("sd-description"));
+        descElements.forEach((element) => {
+          if (!(element instanceof HTMLElement)) return;
+          
+          // Skip if already processed
+          if (element.dataset.processed === 'true') return;
+          
+          const createCustomButton = (
+            buttonText: string,
+            url: string,
+            className = "text-[#eb0028] underline whitespace-normal text-left break-words max-w-full"
+          ) => {
+            const button = document.createElement("button");
+            Array.from(element.attributes).forEach((attr) => {
+              button.setAttribute(attr.name, attr.value);
+            });
+            button.className = className;
+            button.innerHTML = buttonText;
+            button.onclick = () => window.open(url, "_blank");
+            button.dataset.processed = 'true';
+            return button;
+          };
 
-        const createCustomButton = (
-          buttonText: string,
-          url: string,
-          className = "text-[#eb0028] underline whitespace-normal text-left break-words max-w-full"
-        ) => {
-          const button = document.createElement("button");
-          Array.from(element.attributes).forEach((attr) => {
-            button.setAttribute(attr.name, attr.value);
+          const content = element.innerHTML;
+          if (content.includes("pdf+button")) {
+            const button = createCustomButton(
+              "Click here to take the DOPE Personality Test | 点这里进行您的DOPE人格测试",
+              "https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing"
+            );
+            element.parentNode?.replaceChild(button, element);
+          } else if (content.includes("jd+button")) {
+            const button = createCustomButton(
+              "Click here to read job scope of all teams | 点这里阅读所有小组的职责范畴",
+              "https://drive.google.com/file/d/1cyHAvG0i5cNjVl-Sq3lusMCjm0rLIvro/view?usp=sharing"
+            );
+            element.parentNode?.replaceChild(button, element);
+          }
+          
+          element.dataset.processed = 'true';
+        });
+
+        // Handle character replacements
+        const replaceCharInElements = (selector: string, from: string, to: string) => {
+          const elements = Array.from(document.getElementsByClassName(selector));
+          elements.forEach((element) => {
+            if (element instanceof HTMLElement && element.innerHTML.includes(from)) {
+              element.innerHTML = element.innerHTML.replace(from, to);
+            }
+            if (element instanceof HTMLInputElement && element.value.includes(from)) {
+              element.value = element.value.replace(from, to);
+              element.name = element.name.replace(from, to);
+            }
           });
-          button.className = className;
-          button.innerHTML = buttonText;
-          button.onclick = () => window.open(url, "_blank");
-          return button;
         };
 
-        if (element.innerHTML.includes("pdf+button")) {
-          const button = createCustomButton(
-            "Click here to take the DOPE Personality Test | 点这里进行您的DOPE人格测试",
-            "https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing"
-          );
-          element.parentNode?.replaceChild(button, element);
-        } else if (element.innerHTML.includes("jd+button")) {
-          const button = createCustomButton(
-            "Click here to read job scope of all teams | 点这里阅读所有小组的职责范畴",
-            "https://drive.google.com/file/d/1cyHAvG0i5cNjVl-Sq3lusMCjm0rLIvro/view?usp=sharing"
-          );
-          element.parentNode?.replaceChild(button, element);
-        }
+        replaceCharInElements("sv-string-viewer", "\\", "|");
+        replaceCharInElements("sd-item__control", "\\", "|");
       });
-
-      // Handle character replacements
-      const replaceCharInElements = (selector: string, from: string, to: string) => {
-        const elements = Array.from(document.getElementsByClassName(selector));
-        elements.forEach((element) => {
-          if (element instanceof HTMLElement && element.innerHTML.includes(from)) {
-            element.innerHTML = element.innerHTML.replace(from, to);
-          }
-          if (element instanceof HTMLInputElement && element.value.includes(from)) {
-            element.value = element.value.replace(from, to);
-            element.name = element.name.replace(from, to);
-          }
-        });
-      };
-
-      replaceCharInElements("sv-string-viewer", "\\", "|");
-      replaceCharInElements("sd-item__control", "\\", "|");
     };
 
     // Register handlers
