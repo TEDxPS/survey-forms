@@ -318,6 +318,9 @@ export default function SurveyComponent() {
     surveyModel.onElementRerendered?.add(handleElementRerendered);
     surveyModel.onServerValidateQuestions.add(handleServerValidateQuestions);
 
+    // Initial execution
+    handleElementRerendered();
+
     // Cleanup
     return () => {
       if (countdownTimer) clearInterval(countdownTimer);
