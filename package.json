@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^7.15.2",
+    "@next/third-parties": "^15.2.5",
     "@react-oauth/google": "^0.12.1",
     "ace-builds": "latest",
     "google-auth-library": "^9.15.1",

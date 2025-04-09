@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/shared/Header";
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,12 +16,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaTagId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||'G-9WHD1HB8XC'
+
   return (
     <html lang="en">
       <body className={`${inter.className} bg-black`}>
         <Header />
         <main>{children}</main>
       </body>
+      <GoogleAnalytics gaId={gaTagId} />
+
     </html>
   );
 }
