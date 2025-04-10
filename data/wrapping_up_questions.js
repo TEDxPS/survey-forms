@@ -10,20 +10,20 @@ export const wrappingUp = {
             isRequired: true,
             choices: [
                 {
-                    text: "Orientation Day - May 24, 2024 \\ 2024年5月24日 迎新日",
-                    value: "2024年5月24日 \\ 迎新日"
+                    text: "Orientation Day - May 24, 2025 \\ 2025年5月24日 迎新日",
+                    value: "2025年5月24日 \\ 迎新日"
                 },
                 {
                     text: "Pre-event Briefing Day - September 27, 2025 \\ 2025年9月27日 年会前简报日",
                     value: "2025年9月27日 \\ 年会前简报日"
                 },
                 {
-                    text: "Rehearsal Day 1 - October 09, 2024 \\ 2024年10月09日 彩排日 第一天",
-                    value: "2024年10月09日 \\ 彩排日 第一天"
+                    text: "Rehearsal Day 1 - October 09, 2025 \\ 2025年10月09日 彩排日 第一天",
+                    value: "2025年10月09日 \\ 彩排日 第一天"
                 },
                 {
-                    text: "Rehearsal Day 2 - October 10, 2024 \\ 2024年10月10日 彩排日 第二天",
-                    value: "2024年10月10日 \\  彩排日 第二天"
+                    text: "Rehearsal Day 2 - October 10, 2025 \\ 2025年10月10日 彩排日 第二天",
+                    value: "2025年10月10日 \\  彩排日 第二天"
                 },
                 {
                     text: "Event Day - October 11, 2025 \\ 2025年10月11日 年会当日",
