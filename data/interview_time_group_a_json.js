@@ -1,7 +1,7 @@
 export const interviewTimeA = {
     name: "Date and Time for the Interview | 您方便面试的日期与时间",
     description: "Please note that the following interview times are only for us to preliminarily understand your availability. If you qualify, you will receive our official interview invitation. | 请注意，以下面试时间仅供我们初步了解您方便的面试时间。如果您符合资格，您将收到我们的官方面试邀请。",
-    visibleIf: "{first_choice} = 'Partnership' or {first_choice} = 'Food & Beverage' or {first_choice} = 'Public Relations' or {first_choice} = 'Ticketing' or {first_choice} = 'Volunteer Management' or {first_choice} = 'Production' or {first_choice} = 'Video & Photo'",
+    visibleIf: "{first_choice} = 'Partnership' or {first_choice} = 'Food & Beverage' or {first_choice} = 'Public Relations' or {first_choice} = 'Ticketing' or {first_choice} = 'Volunteer Management' or {first_choice} = 'Production' or {first_choice} = 'Stage Management' or {first_choice} = 'Video & Photo'",
     elements: [
         {
             type: "panel",
