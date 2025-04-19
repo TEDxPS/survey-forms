@@ -77,19 +77,37 @@ export const metadata: Metadata = {
 };
 
 export default function Homepage() {
+  const isDueDateSet = !!process.env.DUE_DATE;
+  const isRegistrationClosed = isDueDateSet && new Date() >= new Date(process.env.DUE_DATE || "");
+
   return (
     <div className="flex min-h-screen flex-col items-center bg-[#1c1c1c]">
-    {/* Hero Section */}
-    <div className="w-full relative h-[400px]">
-      <Image
-        src="/tedx-hero.png"
-        alt="TEDx Event Group Photo"
-        fill
-        className="object-cover"
-        priority
-      />
+      {isRegistrationClosed ? (
+        <div className="bg-white rounded-lg my-auto w-4/5 md:w-1/3 p-4">
+          <p className="text-center font-bold text-2xl">Registration Closed | 报名已截止</p>
+          <p className="text-center mt-5">
+            Thank you for your interest! Registration for this year has ended.
+            We hope to see you next year—stay tuned for updates and
+            announcements. 
+            <br/>
+            感谢您的关注！本年度的报名已经结束。欢迎您明年再来，敬请留意我们的最新消息和公告。
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Hero Section */}
+          <div className="w-full relative h-[400px]">
+            <Image
+              src="/tedx-hero.png"
+              alt="TEDx Event Group Photo"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+          <SurveyComponent />
+        </>
+      )}
     </div>
-    <SurveyComponent />
-  </div>
   );
 }
