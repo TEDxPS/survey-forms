@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: tedxpetalingstreet/survey-form
+  IMAGE_NAME: tedxps/survey-form
 
 jobs:
   build-and-push-image:

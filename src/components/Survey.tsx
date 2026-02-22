@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Model, SurveyModel } from "survey-core";
 import { Survey } from "survey-react-ui";
 import "survey-core/survey-core.css";
@@ -106,11 +106,10 @@ export default function SurveyComponent() {
   }, []);
 
   const COUNTDOWN_SECONDS = 15;
-  let countdownTimer: NodeJS.Timeout;
-  let countdownRemaining = COUNTDOWN_SECONDS;
+  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  function startCountdownWithDOMAccess() {
-    countdownRemaining = COUNTDOWN_SECONDS;
+  const startCountdownWithDOMAccess = useCallback(() => {
+    let countdownRemaining = COUNTDOWN_SECONDS;
     const nextBtn = document.querySelector<HTMLButtonElement>(
       ".sd-navigation__next-btn"
     );
@@ -122,19 +121,19 @@ export default function SurveyComponent() {
     nextBtn.disabled = true;
     nextBtn.value = `${countdownRemaining}s`;
 
-    countdownTimer = setInterval(() => {
+    countdownTimerRef.current = setInterval(() => {
       countdownRemaining--;
       if (nextBtn) {
         if (countdownRemaining > 0) {
           nextBtn.value = `${countdownRemaining}s`;
         } else {
-          clearInterval(countdownTimer);
+          if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
           nextBtn.disabled = false;
           nextBtn.value = "Next";
         }
       }
     }, 1000);
-  }
+  }, []);
 
   useEffect(() => {
     if (!surveyModel) return;
@@ -389,7 +388,7 @@ export default function SurveyComponent() {
 
     // Cleanup
     return () => {
-      if (countdownTimer) clearInterval(countdownTimer);
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
       surveyModel.onComplete.remove(handleComplete);
       surveyModel.onUploadFiles.remove(handleUpload);
       surveyModel.onDownloadFile.remove(handleDownload);
@@ -397,7 +396,7 @@ export default function SurveyComponent() {
       surveyModel.onElementRerendered?.remove(handleElementRerendered);
       surveyModel.onServerValidateQuestions.remove(handleServerValidateQuestions);
     };
-  }, [isSubmitting, pages, surveyModel]);
+  }, [isSubmitting, pages, surveyModel, allowDuplicateEmails, startCountdownWithDOMAccess]);
 
   if (isLoading) {
     return (
