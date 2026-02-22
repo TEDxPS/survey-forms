@@ -10,4 +10,4 @@ export const storage = new Storage({
     },
 });
 
-export const bucket = storage.bucket(process.env.GOOGLE_BUCKET_NAME as string);
+export const bucket = storage.bucket((process.env.GOOGLE_BUCKET_NAME || "build-placeholder-bucket") as string);
