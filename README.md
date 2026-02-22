@@ -38,13 +38,22 @@ This template covers most basic use cases. You can find code examples for them i
     - [src/components/DashboardTabulator.tsx](src/components/DashboardTabulator.tsx)
 
 # Building Docker image
+Next.js naturally handles environment variables during runtime so you only need to run the foundational build natively:
+
 ```bash
-docker build \
-  --platform linux/amd64 \
-  --secret id=google_creds,src="your Google Cloud Service Account JSON file full path" \
-  --build-arg MONGO_URI="your_mongo_uri" \
-  --build-arg GOOGLE_BUCKET_NAME="your_bucket_name" \
-  -t recruitment-form:latest .
+docker build --platform linux/amd64 -t recruitment-form:latest .
+```
+
+To natively instantiate the container while securely bootstrapping all configurations globally:
+```bash
+docker run -p 3000:3000 \
+  -e MONGO_URI="mongodb://your-mongo-uri" \
+  -e GOOGLE_PROJECT_ID="your-gcp-project-id" \
+  -e GOOGLE_SERVICE_ACCOUNT_EMAIL="your-service-account-email" \
+  -e GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..." \
+  -e GOOGLE_SHEET_ID="your-global-sheet-fallback" \
+  -e GOOGLE_BUCKET_NAME="your-global-bucket-fallback" \
+  recruitment-form:latest
 ```
 
 # Save Docker image

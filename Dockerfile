@@ -2,15 +2,8 @@
 
 FROM node:18-alpine AS base
 
-# Define ARGs at the top level
-ARG MONGO_URI
-#ARG GOOGLE_APPLICATION_CREDENTIALS
-ARG GOOGLE_BUCKET_NAME
-
 # Install dependencies only when needed
 FROM base AS deps
-ENV MONGO_URI=${MONGO_URI}
-# ENV GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
@@ -24,12 +17,8 @@ RUN \
     else echo "Lockfile not found." && exit 1; \
     fi
 
-
 # Rebuild the source code only when needed
 FROM base AS builder
-ENV MONGO_URI=${MONGO_URI}
-#ENV GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
-ENV GOOGLE_BUCKET_NAME=${GOOGLE_BUCKET_NAME}
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -39,8 +28,7 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN --mount=type=secret,id=google_creds,target=/app/google-services.json \
-    export GOOGLE_APPLICATION_CREDENTIALS=/app/google-services.json && \
+RUN \
     if [ -f yarn.lock ]; then yarn run build; \
     elif [ -f package-lock.json ]; then npm run build; \
     elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
@@ -54,7 +42,15 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-ENV MONGO_URI=${MONGO_URI}
+
+# Define explicitly expected runtime ENVs (which can be passed dynamically via docker run -e)
+ENV MONGO_URI=""
+ENV GOOGLE_PROJECT_ID=""
+ENV GOOGLE_SERVICE_ACCOUNT_EMAIL=""
+ENV GOOGLE_PRIVATE_KEY=""
+ENV GOOGLE_SHEET_ID=""
+ENV GOOGLE_BUCKET_NAME=""
+
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
