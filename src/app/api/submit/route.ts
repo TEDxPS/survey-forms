@@ -1,7 +1,7 @@
 import { JWT } from "google-auth-library";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import dbConnect from "@/libs/mongodb";
-import FormSubmission from "@/models/FormSubmission";
+import { getFormSubmissionModel } from "@/models/FormSubmission";
 import Form from "@/models/Form";
 
 export async function GET() {
@@ -29,8 +29,12 @@ export async function POST(req: Request) {
 
   // Save to database first
   await dbConnect();
-  const submission = new FormSubmission({
-    formName: "recruitment",
+
+  const targetDbSlug = slug || "default_submissions";
+  const DynamicFormSubmission = getFormSubmissionModel(targetDbSlug);
+
+  const submission = new DynamicFormSubmission({
+    formName: slug || "recruitment",
     data: data,  // Keep original data in database
     emailSent: false,
   });

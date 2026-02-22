@@ -81,6 +81,7 @@ The MongoDB document structure is **exactly identical to a standard SurveyJS JSO
     "date": "2026-12-31T23:59:59Z", // Optional: ISO expiration date
     "message": "<p>Registration is closed!</p>" // Optional: HTML message shown upon expiry
   },
+  "allowDuplicateEmails": false, // Optional: Strict validation checking `/api/validate` (defaults to true if omitted)
   "google": {
     "sheetId": "1aBcDeFgHiJkLmNoPqRsTuVwXyZ...", // Optional: Target Google Sheet ID
     "bucketId": "your-gcs-bucket-name", // Optional: Target Google Cloud Storage Bucket Name
@@ -97,5 +98,6 @@ Instead of passing sensitive keys from the backend to the frontend, the data ing
    - If `google.apiKey` exists, the backend parses it and instantiates a customized network connection context for that specific submission or upload instance. 
    - If `google.sheetId` or `google.bucketId` exist, data is routed specifically to those endpoints.
 4. **Environment Fallback**: If the `google` object is omitted in MongoDB or keys are empty, the backend gracefully falls back to the system's global `.env` configuration (`GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_PRIVATE_KEY`, `GOOGLE_SHEET_ID`, `GOOGLE_BUCKET_NAME`).
+5. **Multi-Tenant MongoDB Storage**: Before submission to Google Sheets, the backend natively routes the user's payload into a dynamically generated **MongoDB Database named identically to the form's `slug`**. The raw form metrics are strictly isolated within a `formsubmissions` collection specific to that database, ensuring perfectly siloed validations (e.g. duplicate email checking) and unpolluted data pipelines.
 
 This structure permits every individual survey to securely leverage isolated Google Projects or Sheets without necessitating code alterations or app redeployment!

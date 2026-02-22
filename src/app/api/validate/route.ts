@@ -1,9 +1,11 @@
 import dbConnect from "@/libs/mongodb";
-import FormSubmission from "@/models/FormSubmission";
+import { getFormSubmissionModel } from "@/models/FormSubmission";
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const email = searchParams.get('email');
+
+    const slug = searchParams.get('slug');
 
     if (!email) {
         return Response.json({
@@ -14,7 +16,14 @@ export async function GET(req: Request) {
 
     try {
         await dbConnect();
-        const existedForm = await FormSubmission.findOne({ 'data.email.value': email });
+        const targetDbSlug = slug || "default_submissions";
+        const DynamicFormSubmission = getFormSubmissionModel(targetDbSlug);
+
+        const query: any = { 'data.email.value': email };
+        if (slug) {
+            query.formName = slug;
+        }
+        const existedForm = await DynamicFormSubmission.findOne(query);
 
         return Response.json({
             success: true,

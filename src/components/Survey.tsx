@@ -48,6 +48,7 @@ export default function SurveyComponent() {
   const [pages, setPages] = useState<(Choice | string)[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expiry, setExpiry] = useState<Expiry | null>(null);
+  const [allowDuplicateEmails, setAllowDuplicateEmails] = useState<boolean>(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -64,6 +65,7 @@ export default function SurveyComponent() {
 
         if (isMounted) {
           setExpiry(jsonResponse.expiry || data?.expiry || null);
+          setAllowDuplicateEmails(jsonResponse.allowDuplicateEmails ?? data?.allowDuplicateEmails ?? true);
           const model = new Model(data);
           model.applyTheme({
             themeName: "tedxRecruitFormTheme",
@@ -282,6 +284,11 @@ export default function SurveyComponent() {
     };
 
     const handleServerValidateQuestions = async (_: any, { data, errors, complete }: { data: Record<string, any>; errors: Record<string, string>; complete: () => void }) => {
+      if (allowDuplicateEmails) {
+        complete();
+        return;
+      }
+
       const email = data["email"];
       if (!email || errors["email"]) {
         complete();
@@ -289,7 +296,8 @@ export default function SurveyComponent() {
       }
 
       try {
-        const response = await fetch("/api/validate?email=" + email);
+        const currentPath = window.location.pathname.replace(/^\/+/, "");
+        const response = await fetch(`/api/validate?email=${encodeURIComponent(email)}&slug=${encodeURIComponent(currentPath)}`);
 
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || "Upload failed");
