@@ -2,6 +2,8 @@ import nodemailer from "nodemailer";
 import dbConnect from "@/libs/mongodb";
 import FormSubmission from "@/models/FormSubmission";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   return Response.json({ data: "Wrong Method" });
 }
@@ -42,37 +44,37 @@ export async function POST() {
       
       <div style="background: #f5f5f5; padding: 20px; border-radius: 5px;">
         ${Object.entries(submission.data)
-          .map(([key, value]) => {
-            if (typeof value === 'object' && value !== null) {
-              const title = 'question_title' in value ? value.question_title : key;
+      .map(([key, value]) => {
+        if (typeof value === 'object' && value !== null) {
+          const title = 'question_title' in value ? value.question_title : key;
 
-              // Check if answer_text exists and is an array
-              if ('answer_text' in value && Array.isArray(value.answer_text)) {
-                return `
+          // Check if answer_text exists and is an array
+          if ('answer_text' in value && Array.isArray(value.answer_text)) {
+            return `
                   <p><strong>${title}</strong><br/>
-                    ${value.answer_text.map(file => 
-                      'content' in file && 'name' in file
-                        ? `<a href="${file.content}" target="_blank">${file.name}</a>`
-                        : ''
-                    ).filter(Boolean).join(', ')}
+                    ${value.answer_text.map(file =>
+              'content' in file && 'name' in file
+                ? `<a href="${file.content}" target="_blank">${file.name}</a>`
+                : ''
+            ).filter(Boolean).join(', ')}
                   </p>
                 `;
-              }
+          }
 
-              // Handle regular fields
-              if ('question_title' in value && 'answer_text' in value) {
-                return `
+          // Handle regular fields
+          if ('question_title' in value && 'answer_text' in value) {
+            return `
                   <p><strong>${value.question_title}</strong><br/>
                     ${value.answer_text}
                   </p>
                 `;
-              }
-            }
-            return `
+          }
+        }
+        return `
               <p><strong>${key}:</strong> ${value}</p>
             `;
-          })
-          .join('')}
+      })
+      .join('')}
       </div>
 
       <p style="margin-top: 20px;">We will review your application and get back to you soon.</p>

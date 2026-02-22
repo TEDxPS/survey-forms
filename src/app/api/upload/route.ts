@@ -4,6 +4,8 @@ import { Storage } from "@google-cloud/storage";
 import dbConnect from "@/libs/mongodb";
 import Form from "@/models/Form";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();

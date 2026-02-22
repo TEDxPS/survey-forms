@@ -4,6 +4,8 @@ import dbConnect from "@/libs/mongodb";
 import { getFormSubmissionModel } from "@/models/FormSubmission";
 import Form from "@/models/Form";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   return Response.json({ data: "hello" });
 }

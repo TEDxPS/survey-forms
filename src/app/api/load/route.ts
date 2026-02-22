@@ -1,6 +1,8 @@
 import dbConnect from "@/libs/mongodb";
 import Form from "@/models/Form";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
     try {
         const reqUrl = new URL(req.url);
