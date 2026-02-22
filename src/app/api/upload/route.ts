@@ -1,5 +1,8 @@
-import { bucket } from "@/libs/gcpbucket";
+import { bucket as defaultBucket, storage as defaultStorage } from "@/libs/gcpbucket";
 import { createHash } from "crypto";
+import { Storage } from "@google-cloud/storage";
+import dbConnect from "@/libs/mongodb";
+import Form from "@/models/Form";
 
 export async function POST(req: Request) {
   try {
@@ -9,6 +12,34 @@ export async function POST(req: Request) {
     if (!file) {
       return Response.json({ error: "No file uploaded" }, { status: 400 });
     }
+
+    let targetBucketId = null;
+    let customStorage = null;
+
+    const slug = formData.get("slug") as string;
+    if (slug) {
+      await dbConnect();
+      const form = await Form.findOne({ slug });
+      if (form && form.google) {
+        if (form.google.bucketId) {
+          targetBucketId = form.google.bucketId;
+        }
+
+        if (form.google.apiKey && form.google.apiKey.includes('private_key')) {
+          try {
+            const credentials = typeof form.google.apiKey === 'string'
+              ? JSON.parse(form.google.apiKey)
+              : form.google.apiKey;
+            customStorage = new Storage({ credentials });
+          } catch (e) {
+            console.error("Failed to parse provided apiKey as JSON:", e);
+          }
+        }
+      }
+    }
+
+    const storageToUse = customStorage || defaultStorage;
+    const bucket = targetBucketId ? storageToUse.bucket(targetBucketId) : defaultBucket;
 
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());

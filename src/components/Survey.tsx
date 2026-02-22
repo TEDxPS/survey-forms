@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { Model, SurveyModel } from "survey-core";
 import { Survey } from "survey-react-ui";
 import "survey-core/survey-core.css";
-import { json } from "../../data/survey_json.js";
-import { surveyTheme } from "../../data/survey_theme_json.js";
+import "../app/survey_theme.css";
 
 interface Choice {
   value: string;
@@ -37,25 +36,72 @@ interface CompleteOptions {
   showSaveError: () => void;
 }
 
+interface Expiry {
+  date?: string;
+  message?: string;
+}
+
 export default function SurveyComponent() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [surveyModel] = useState(() => {
-    const model = new Model(json);
-    model.applyTheme(surveyTheme);
-    return model;
-  });
+  const [surveyModel, setSurveyModel] = useState<SurveyModel | null>(null);
+  const [pages, setPages] = useState<(Choice | string)[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [expiry, setExpiry] = useState<Expiry | null>(null);
 
-  const firstChoiceQuestion = json.pages[0].elements.find(
-    (element) =>
-      element.name === "first_choice" &&
-      (element.type === "dropdown" || element.type === "radiogroup")
-  );
+  useEffect(() => {
+    let isMounted = true;
+    const loadSurveyData = async () => {
+      try {
+        const currentPath = window.location.pathname.replace(/^\/+/, "");
+        const res = await fetch(`/api/load?slug=${encodeURIComponent(currentPath)}`);
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || "Failed to load form configuration");
+        }
+        const jsonResponse = await res.json();
+        const { data } = jsonResponse;
 
-  const pages =
-    firstChoiceQuestion && "choices" in firstChoiceQuestion
-      ? firstChoiceQuestion.choices
-      : [];
+        if (isMounted) {
+          setExpiry(jsonResponse.expiry || data?.expiry || null);
+          const model = new Model(data);
+          model.applyTheme({
+            themeName: "tedxRecruitFormTheme",
+            colorPalette: "dark",
+            isPanelless: false,
+          });
+          setSurveyModel(model);
+
+          const firstChoiceQuestion = data.pages?.[0]?.elements?.find(
+            (element: any) =>
+              element.name === "first_choice" &&
+              (element.type === "dropdown" || element.type === "radiogroup")
+          );
+
+          setPages(
+            firstChoiceQuestion && "choices" in firstChoiceQuestion
+              ? firstChoiceQuestion.choices
+              : []
+          );
+        }
+      } catch (err) {
+        console.error("Error loading form data:", err);
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Error loading form");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadSurveyData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const COUNTDOWN_SECONDS = 15;
   let countdownTimer: NodeJS.Timeout;
@@ -89,6 +135,8 @@ export default function SurveyComponent() {
   }
 
   useEffect(() => {
+    if (!surveyModel) return;
+
     // Define handlers
     const handleComplete = async (
       survey: SurveyModel,
@@ -126,7 +174,12 @@ export default function SurveyComponent() {
           }
         });
 
-        const response = await fetch("/api/recruitment/submit", {
+        const currentPath = window.location.pathname.replace(/^\/+/, "");
+        if (currentPath) {
+          enrichedData["slug"] = currentPath;
+        }
+
+        const response = await fetch("/api/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(enrichedData),
@@ -156,8 +209,13 @@ export default function SurveyComponent() {
       const formData = new FormData();
       options.files.forEach((file) => formData.append("file", file));
 
+      const currentPath = window.location.pathname.replace(/^\/+/, "");
+      if (currentPath) {
+        formData.append("slug", currentPath);
+      }
+
       try {
-        const response = await fetch("/api/recruitment/upload", {
+        const response = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         });
@@ -225,13 +283,13 @@ export default function SurveyComponent() {
 
     const handleServerValidateQuestions = async (_: any, { data, errors, complete }: { data: Record<string, any>; errors: Record<string, string>; complete: () => void }) => {
       const email = data["email"];
-      if(!email || errors["email"]){
+      if (!email || errors["email"]) {
         complete();
         return;
       }
 
       try {
-        const response = await fetch("/api/recruitment/check-unique?email=" + email);
+        const response = await fetch("/api/validate?email=" + email);
 
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || "Upload failed");
@@ -253,10 +311,10 @@ export default function SurveyComponent() {
         const descElements = Array.from(document.getElementsByClassName("sd-description"));
         descElements.forEach((element) => {
           if (!(element instanceof HTMLElement)) return;
-          
+
           // Skip if already processed
           if (element.dataset.processed === 'true') return;
-          
+
           const createCustomButton = (
             buttonText: string,
             url: string,
@@ -287,7 +345,7 @@ export default function SurveyComponent() {
             );
             element.parentNode?.replaceChild(button, element);
           }
-          
+
           element.dataset.processed = 'true';
         });
 
@@ -333,14 +391,32 @@ export default function SurveyComponent() {
     };
   }, [isSubmitting, pages, surveyModel]);
 
-  return !error ? (
+  if (isLoading) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center py-20 bg-[#1c1c1c]">
+        <div className="w-12 h-12 border-4 border-[#eb0028] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-white text-lg font-medium animate-pulse">Loading form...</p>
+      </div>
+    );
+  }
+
+  if (expiry && expiry.date && new Date() > new Date(expiry.date)) {
+    return (
+      <div
+        className="w-full flex flex-col items-center justify-center py-20 bg-[#1c1c1c] text-white p-4"
+        dangerouslySetInnerHTML={{ __html: expiry.message || "This form has expired." }}
+      />
+    );
+  }
+
+  return !error && surveyModel ? (
     <Survey model={surveyModel} />
   ) : (
     <div className="w-full text-center space-y-2 py-3 bg-[#1c1c1c]">
       <p className="font-bold text-white text-2xl">{error}</p>
       <button
         onClick={() => setError(null)}
-        className="text-sm bg-white p-2 rounded"
+        className="text-sm bg-white p-2 rounded text-black"
       >
         Dismiss
       </button>
