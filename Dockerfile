@@ -43,17 +43,6 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# Define explicitly expected runtime ENVs (which can be passed dynamically via docker run -e)
-# ENV MONGO_URI=""
-# ENV GOOGLE_PROJECT_ID=""
-# ENV GOOGLE_SERVICE_ACCOUNT_EMAIL=""
-# ENV GOOGLE_PRIVATE_KEY=""
-# ENV GOOGLE_SHEET_ID=""
-# ENV GOOGLE_BUCKET_NAME=""
-
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED=1
-
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
