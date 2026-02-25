@@ -305,50 +305,32 @@ export default function SurveyComponent() {
             }
         };
 
+        const handleTextMarkdown = (_: any, options: { text: string; html?: string; }) => {
+            // 1. Handle actual Markdown links: [Link Text](https://url) format
+            const markdownRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+            let modifiedText = options.text;
+
+            if (modifiedText.match(markdownRegex)) {
+                modifiedText = modifiedText.replace(markdownRegex, (match, text, url) => {
+                    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-[#eb0028] underline whitespace-normal text-left break-words max-w-full cursor-pointer inline-block mt-1 hover:text-red-700">${text}</a>`;
+                });
+            }
+
+            // 2. Handle raw HTML links: <a href="url">Text</a> format
+            const htmlLinkRegex = /<a\s+(?:[^>]*?\s+)?href=["'](.*?)["'][^>]*>(.*?)<\/a>/gi;
+            if (modifiedText.match(htmlLinkRegex)) {
+                modifiedText = modifiedText.replace(htmlLinkRegex, (match, url, text) => {
+                    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-[#eb0028] underline whitespace-normal text-left break-words max-w-full cursor-pointer inline-block mt-1 hover:text-red-700">${text}</a>`;
+                });
+            }
+
+            if (modifiedText !== options.text) {
+                options.html = modifiedText;
+            }
+        };
+
         const handleElementRerendered = () => {
             requestAnimationFrame(() => {
-                // Handle special buttons
-                const descElements = Array.from(document.getElementsByClassName("sd-description"));
-                descElements.forEach((element) => {
-                    if (!(element instanceof HTMLElement)) return;
-
-                    // Skip if already processed
-                    if (element.dataset.processed === 'true') return;
-
-                    const createCustomButton = (
-                        buttonText: string,
-                        url: string,
-                        className = "text-[#eb0028] underline whitespace-normal text-left break-words max-w-full"
-                    ) => {
-                        const button = document.createElement("button");
-                        Array.from(element.attributes).forEach((attr) => {
-                            button.setAttribute(attr.name, attr.value);
-                        });
-                        button.className = className;
-                        button.innerHTML = buttonText;
-                        button.onclick = () => window.open(url, "_blank");
-                        button.dataset.processed = 'true';
-                        return button;
-                    };
-
-                    const content = element.innerHTML;
-                    if (content.includes("pdf+button")) {
-                        const button = createCustomButton(
-                            "Click here to take the DOPE Personality Test | 点这里进行您的DOPE人格测试",
-                            "https://drive.google.com/file/d/1cAl2GKDqrCAJWbZkw63N8ZNEzsa6Prfg/view?usp=sharing"
-                        );
-                        element.parentNode?.replaceChild(button, element);
-                    } else if (content.includes("jd+button")) {
-                        const button = createCustomButton(
-                            "Click here to read job scope of all teams | 点这里阅读所有小组的职责范畴",
-                            "https://drive.google.com/file/d/1cyHAvG0i5cNjVl-Sq3lusMCjm0rLIvro/view?usp=sharing"
-                        );
-                        element.parentNode?.replaceChild(button, element);
-                    }
-
-                    element.dataset.processed = 'true';
-                });
-
                 // Handle character replacements
                 const replaceCharInElements = (selector: string, from: string, to: string) => {
                     const elements = Array.from(document.getElementsByClassName(selector));
@@ -363,8 +345,8 @@ export default function SurveyComponent() {
                     });
                 };
 
-                replaceCharInElements("sv-string-viewer", "\\", "|");
-                replaceCharInElements("sd-item__control", "\\", "|");
+                replaceCharInElements("sv-string-viewer", "\\\\", "|");
+                replaceCharInElements("sd-item__control", "\\\\", "|");
             });
         };
 
@@ -375,6 +357,7 @@ export default function SurveyComponent() {
         surveyModel.onAfterRenderPage.add(handleRender);
         surveyModel.onElementRerendered?.add(handleElementRerendered);
         surveyModel.onServerValidateQuestions.add(handleServerValidateQuestions);
+        surveyModel.onTextMarkdown.add(handleTextMarkdown);
 
         // Initial execution
         handleElementRerendered();
@@ -388,6 +371,7 @@ export default function SurveyComponent() {
             surveyModel.onAfterRenderPage.remove(handleRender);
             surveyModel.onElementRerendered?.remove(handleElementRerendered);
             surveyModel.onServerValidateQuestions.remove(handleServerValidateQuestions);
+            surveyModel.onTextMarkdown.remove(handleTextMarkdown);
         };
     }, [isSubmitting, pages, surveyModel, allowDuplicateEmails, startCountdownWithDOMAccess]);
 

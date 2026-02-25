@@ -126,3 +126,30 @@ Instead of passing sensitive keys from the backend to the frontend, the data ing
 5. **Multi-Tenant MongoDB Storage**: Before submission to Google Sheets, the backend natively routes the user's payload into a dynamically generated **MongoDB Database named identically to the form's `slug`**. The raw form metrics are strictly isolated within a `formsubmissions` collection specific to that database, ensuring perfectly siloed validations (e.g. duplicate email checking) and unpolluted data pipelines.
 
 This structure permits every individual survey to securely leverage isolated Google Projects or Sheets without necessitating code alterations or app redeployment!
+
+## 4. Adding Clickable Links (Markdown & HTML)
+The built-in Survey component is configured with a global text interceptor (`onTextMarkdown`). This means you do not need to manually configure DOM elements to display beautiful, natively branded links. You can safely place standard Markdown links or standard HTML `<a>` tags inside any text property (such as `title` or `description`) in your MongoDB form JSON.
+
+The system will automatically intercept these on render and inject the project's Tailwind utility classes (e.g., `text-[#eb0028] underline...`) and safety attributes (`target="_blank" rel="noopener noreferrer"`).
+
+**Example using Markdown:**
+```json
+{
+  "type": "file",
+  "name": "dope_test",
+  "title": "Please upload your DOPE test results",
+  "description": "Please take the test before uploading. [Click here to take the DOPE Personality Test](https://example.com/file)"
+}
+```
+
+**Example using direct HTML:**
+```json
+{
+  "type": "radiogroup",
+  "name": "first_choice",
+  "title": "What is your first choice?",
+  "description": "<a href='https://example.com/job-scope'>Click here to read the job scope of all teams</a>"
+}
+```
+
+Both approaches will render identically out of the box with the correct project styling applied globally inside the survey!
