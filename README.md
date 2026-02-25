@@ -84,7 +84,11 @@ The MongoDB document structure is **exactly identical to a standard SurveyJS JSO
   "slug": "survey-name",
   "title": "Recruitment Form 2026",
   "pages": [
-    // ... Any standard SurveyJS JSON definition ...
+    {
+      "name": "introduction",
+      "elements": [ ... ],
+      "readTimeEnforcement": 15 // Optional: Number of seconds to force users to read this specific page before 'Next' is enabled.
+    }
   ],
   "expiry": {
     "date": "2026-12-31T23:59:59Z", // Optional: ISO expiration date
