@@ -94,7 +94,19 @@ The MongoDB document structure is **exactly identical to a standard SurveyJS JSO
   "google": {
     "sheetId": "1aBcDeFgHiJkLmNoPqRsTuVwXyZ...", // Optional: Target Google Sheet ID
     "bucketId": "your-gcs-bucket-name", // Optional: Target Google Cloud Storage Bucket Name
-    "apiKey": "{\"type\": \"service_account\", \"project_id\": \"...\", \"private_key\": \"-----BEGIN PRIVATE KEY-----\\n...\", \"client_email\": \"...\"}" // Optional: Stringified Google Service Account JSON
+    
+    // Paste the exact properties from your GCP `google-services.json` file below:
+    "type": "service_account",
+    "project_id": "your-project...",
+    "private_key_id": "...",
+    "private_key": "-----BEGIN PRIVATE KEY-----\\n...", 
+    "client_email": "your-service-account@your-project.iam.gserviceaccount.com",
+    "client_id": "...",
+    "auth_uri": "...",
+    "token_uri": "...",
+    "auth_provider_x509_cert_url": "...",
+    "client_x509_cert_url": "...",
+    "universe_domain": "googleapis.com"
   }
 }
 ```
@@ -104,7 +116,7 @@ Instead of passing sensitive keys from the backend to the frontend, the data ing
 1. **Frontend Submission**: The frontend submits the user's survey data or uploaded files alongside the `slug`.
 2. **Backend Interception**: The backend `POST` routes (`/api/submit`, `/api/upload`) extract the `slug` and securely query MongoDB to fetch the credentials mapping associated with that specific form.
 3. **Dynamic Credentials**: 
-   - If `google.apiKey` exists, the backend parses it and instantiates a customized network connection context for that specific submission or upload instance. 
+   - If `google.private_key` and `google.client_email` exist (by directly pasting the `google-services.json` properties), the backend uses them and instantiates a customized network connection context for that specific submission or upload instance. 
    - If `google.sheetId` or `google.bucketId` exist, data is routed specifically to those endpoints.
 4. **Environment Fallback**: If the `google` object is omitted in MongoDB or keys are empty, the backend gracefully falls back to the system's global `.env` configuration (`GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_PRIVATE_KEY`, `GOOGLE_SHEET_ID`, `GOOGLE_BUCKET_NAME`).
 5. **Multi-Tenant MongoDB Storage**: Before submission to Google Sheets, the backend natively routes the user's payload into a dynamically generated **MongoDB Database named identically to the form's `slug`**. The raw form metrics are strictly isolated within a `formsubmissions` collection specific to that database, ensuring perfectly siloed validations (e.g. duplicate email checking) and unpolluted data pipelines.

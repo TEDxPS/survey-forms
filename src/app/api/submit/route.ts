@@ -51,65 +51,62 @@ export async function POST(req: Request) {
   }
 
   let serviceAccountAuth;
-  if (googleConfig && googleConfig.apiKey && googleConfig.apiKey.includes('private_key')) {
-    try {
-      const credentials = typeof googleConfig.apiKey === 'string'
-        ? JSON.parse(googleConfig.apiKey)
-        : googleConfig.apiKey;
-      serviceAccountAuth = new JWT({
-        email: credentials.client_email,
-        key: credentials.private_key,
-        scopes: ['https://www.googleapis.com/auth/spreadsheets']
-      });
-    } catch (e) {
-      console.error("Failed to parse provided apiKey as JSON:", e);
-    }
-  }
-
-  if (!serviceAccountAuth) {
+  if (googleConfig && googleConfig.private_key && googleConfig.client_email) {
     serviceAccountAuth = new JWT({
-      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY?.split(String.raw`\n`).join(
-        "\n"
-      ),
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+      email: googleConfig.client_email,
+      key: typeof googleConfig.private_key === 'string' ? googleConfig.private_key.replace(/\\n/g, '\n') : googleConfig.private_key,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets']
     });
   }
 
-  const doc = new GoogleSpreadsheet(
-    googleConfig?.sheetId || (process.env.GOOGLE_SHEET_ID as string),
-    serviceAccountAuth
-  );
-  await doc.loadInfo(); // loads document properties and worksheets
-
-  console.log('Entry Data: ', data);
-
-  const sheetData = Object.fromEntries(
-    Object.entries(processedData).map(([key, value]) => [
-      key,
-      Array.isArray(value)
-        ? value.map(v => typeof v === 'object' && v !== null ? v.content : v).join(",")
-        : String(value)
-    ])
-  ) as { [key: string]: string };
-
-  // Add Submission ID and Timestamp
-  const now = new Date();
-  const malaysiaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // Convert to GMT+8
-
-  sheetData["Submission ID"] = now.getTime().toString();
-  sheetData["Timestamp"] = malaysiaTime.toISOString().replace('T', ' ').slice(0, 19);
-
-  console.log('Sheet Data: ', sheetData);
-
-  const sheet = doc.sheetsByIndex[0]; // or use `doc.sheetsById[id]` or `doc.sheetsByTitle[title]`
-  await sheet.addRow(sheetData);
-
-  if (data["first_choice"] && data["first_choice"]["value"]) {
-    const teamSheet = doc.sheetsByTitle[data["first_choice"]["value"]];
-    if (teamSheet) {
-      await teamSheet.addRow(sheetData);
+  if (!serviceAccountAuth) {
+    if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+      serviceAccountAuth = new JWT({
+        email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        key: process.env.GOOGLE_PRIVATE_KEY?.split(String.raw`\n`).join("\n"),
+        scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+      });
     }
+  }
+
+  if (serviceAccountAuth) {
+    const doc = new GoogleSpreadsheet(
+      googleConfig?.sheetId || (process.env.GOOGLE_SHEET_ID as string),
+      serviceAccountAuth
+    );
+    await doc.loadInfo(); // loads document properties and worksheets
+
+    console.log('Entry Data: ', data);
+
+    const sheetData = Object.fromEntries(
+      Object.entries(processedData).map(([key, value]) => [
+        key,
+        Array.isArray(value)
+          ? value.map(v => typeof v === 'object' && v !== null ? v.content : v).join(",")
+          : String(value)
+      ])
+    ) as { [key: string]: string };
+
+    // Add Submission ID and Timestamp
+    const now = new Date();
+    const malaysiaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // Convert to GMT+8
+
+    sheetData["Submission ID"] = now.getTime().toString();
+    sheetData["Timestamp"] = malaysiaTime.toISOString().replace('T', ' ').slice(0, 19);
+
+    console.log('Sheet Data: ', sheetData);
+
+    const sheet = doc.sheetsByIndex[0]; // or use `doc.sheetsById[id]` or `doc.sheetsByTitle[title]`
+    await sheet.addRow(sheetData);
+
+    if (data["first_choice"] && data["first_choice"]["value"]) {
+      const teamSheet = doc.sheetsByTitle[data["first_choice"]["value"]];
+      if (teamSheet) {
+        await teamSheet.addRow(sheetData);
+      }
+    }
+  } else {
+    console.warn("No Google credentials provided, skipping Google Sheets insertion.");
   }
 
   return Response.json({ data: "OK" });
