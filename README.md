@@ -18,24 +18,7 @@ npm run dev
 
 Open http://localhost:3000/ in your web browser.
 
-## Template structure
 
-This template covers most basic use cases. You can find code examples for them in the following files:
-
-- Create a standalone survey
-  - [data/survey_json.js](data/survey_json.js)
-  - [src/components/Survey.tsx](src/components/Survey.tsx)
-- Add Survey Creator to a page
-  - [src/components/SurveyCreator.tsx](src/components/SurveyCreator.tsx)
-- Export a survey to a PDF document
-  - [src/app/pdf-export/page.tsx](src/app/pdf-export/page.tsx)
-- Visualize survey results
-  - As charts
-    - [data/dashboard_data.js](data/dashboard_data.js)
-    - [src/components/Dashboard.tsx](src/components/Dashboard.tsx)
-  - As a table
-    - [data/dashboard_data.js](data/dashboard_data.js)
-    - [src/components/DashboardTabulator.tsx](src/components/DashboardTabulator.tsx)
 
 # Building Docker image
 Next.js naturally handles environment variables during runtime so you only need to run the foundational build natively:
@@ -144,6 +127,12 @@ docker exec -it <your-container-name> node scripts/populateGoogleSheet/index.js 
 The script will authenticate using the credentials stored in MongoDB for that `slug`, and dynamically generate the worksheets for you:
 1. **Master Sheet**: The very first worksheet will be formatted to include all questions globally from your survey.
 2. **Dynamic Team Worksheets**: If any `pages` within your MongoDB JSON define a `customData.sheetName` property (as seen in the JSON example above), the script will automatically instantiate separate tabs named identically to those sheet names. It will then precisely combine your survey's general questions alongside that specific page's questions to create perfectly isolated tabs (e.g., for routing specific 'Teams').
+
+## 4. Intelligent Sheet Routing (Master Insert + Carbon Copies)
+The `/api/submit` endpoint natively complements the structure mapping deployed by the initialization script above, ensuring that all traffic routing functions generically without any hardcoded fields anywhere in the system!
+1. **Master Insert**: The absolutely first worksheet tab always serves as your master data log natively. It automatically ingests all answers from the entire, unrestricted structure without exception.
+2. **Dynamic Carbon Copies**: The form intelligently cross-references the user's generated answers during processing. During validation against the database configuration `pages`, it instantly identifies every question mapping mapped to any `customData.sheetName` declaration. Simply by confirming that the user possessed/provided data against ANY of the explicit questions listed on a "team page", it immediately verifies interaction with that section natively! Upon confirmation, it identically mirrors the submission row completely into that identical `customData.sheetName` Google Sheet tab natively without disruption!
+This inherent flexibility implies that adding an entirely new team department to your backend explicitly never requires backend system modification!
 
 ## 5. Adding Clickable Links (Markdown & HTML)
 The built-in Survey component is configured with a global text interceptor (`onTextMarkdown`). This means you do not need to manually configure DOM elements to display beautiful, natively branded links. You can safely place standard Markdown links or standard HTML `<a>` tags inside any text property (such as `title` or `description`) in your MongoDB form JSON.
