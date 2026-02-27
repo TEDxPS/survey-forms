@@ -61,7 +61,7 @@ async function populateGoogleSheet(slug: string) {
   await doc.loadInfo(); // loads document properties and worksheets
 
   // Extract all questions from the form
-  const questions = (form.pages || [])
+  const allQuestions = (form.pages || [])
     .flatMap((page: any) => page.elements || [])
     .flatMap((element: SurveyElement) => {
       // Handle panels which might have nested elements
@@ -76,8 +76,8 @@ async function populateGoogleSheet(slug: string) {
     }));
 
   const defaultHeaders = ["Submission ID", "Timestamp"];
-  const combinedHeaders = [...defaultHeaders, ...questions.map((q: any) => q.id)];
-  const combinedDescriptions = [...defaultHeaders, ...questions.map((q: any) => q.title)];
+  const combinedHeaders = [...defaultHeaders, ...allQuestions.map((q: any) => q.id)];
+  const combinedDescriptions = [...defaultHeaders, ...allQuestions.map((q: any) => q.title)];
 
   const firstSheet = doc.sheetsByIndex[0];
 
@@ -89,6 +89,69 @@ async function populateGoogleSheet(slug: string) {
   await firstSheet.addRow(combinedDescriptions);
 
   console.log(`Successfully initialized first sheet of '${doc.title}' with ${combinedHeaders.length} columns.`);
+
+  // Find general questions (from pages without customData.sheetName)
+  const generalQuestions = (form.pages || [])
+    .filter((page: any) => !page.customData || !page.customData.sheetName)
+    .flatMap((page: any) => page.elements || [])
+    .flatMap((element: SurveyElement) => {
+      if (element.type === "panel" && element.elements) {
+        return element.elements.filter((e) => e.type !== "html" && e.type !== "expression");
+      }
+      return (element.type !== "html" && element.type !== "expression") ? [element] : [];
+    })
+    .map((element: SurveyElement) => ({
+      id: element.name,
+      title: element.title || element.name,
+    }));
+
+  const existingSheets = doc.sheetsByTitle;
+
+  // Group team pages by sheetName
+  const teamPagesMap: Record<string, any[]> = {};
+  for (const page of (form.pages || [])) {
+    if (page.customData && page.customData.sheetName) {
+      if (!teamPagesMap[page.customData.sheetName]) {
+        teamPagesMap[page.customData.sheetName] = [];
+      }
+      teamPagesMap[page.customData.sheetName].push(page);
+    }
+  }
+
+  // Create separate sheets for teams
+  for (const sheetTitle of Object.keys(teamPagesMap)) {
+    if (!existingSheets[sheetTitle]) {
+      const teamQuestions = teamPagesMap[sheetTitle]
+        .flatMap((page: any) => page.elements || [])
+        .flatMap((element: SurveyElement) => {
+          if (element.type === "panel" && element.elements) {
+            return element.elements.filter((e) => e.type !== "html" && e.type !== "expression");
+          }
+          return (element.type !== "html" && element.type !== "expression") ? [element] : [];
+        })
+        .map((element: SurveyElement) => ({
+          id: element.name,
+          title: element.title || element.name,
+        }));
+
+      const teamCombinedHeaders = [...defaultHeaders, ...generalQuestions.map((q: any) => q.id), ...teamQuestions.map((q: any) => q.id)];
+      const teamCombinedDescriptions = [...defaultHeaders, ...generalQuestions.map((q: any) => q.title), ...teamQuestions.map((q: any) => q.title)];
+
+      const newSheet = await doc.addSheet({
+        title: sheetTitle,
+        headerValues: teamCombinedHeaders,
+        gridProperties: {
+          rowCount: 500,
+          columnCount: teamCombinedHeaders.length,
+        }
+      });
+
+      await newSheet.addRow(teamCombinedDescriptions);
+      console.log(`Created and initialized team sheet: '${sheetTitle}'`);
+    } else {
+      console.log(`Team sheet '${sheetTitle}' already exists. Skipping creation.`);
+    }
+  }
 }
 
 // Get slug from command line args

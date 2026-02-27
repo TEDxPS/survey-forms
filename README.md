@@ -83,6 +83,13 @@ The MongoDB document structure is **exactly identical to a standard SurveyJS JSO
       "name": "introduction",
       "elements": [ ... ],
       "readTimeEnforcement": 15 // Optional: Number of seconds to force users to read this specific page before 'Next' is enabled.
+    },
+    {
+      "name": "editorial_questions",
+      "elements": [ ... ],
+      "customData": {
+        "sheetName": "Editorial" // Optional: Routes questions on this page to an isolated "Editorial" worksheet tab
+      }
     }
   ],
   "expiry": {
@@ -134,7 +141,9 @@ npx ts-node scripts/populateGoogleSheet.ts <your-form-slug>
 docker exec -it <your-container-name> node scripts/populateGoogleSheet/index.js <your-form-slug>
 ```
 
-The script will authenticate using the credentials stored in MongoDB for that `slug` and automatically format the first worksheet to perfectly match your survey's schema!
+The script will authenticate using the credentials stored in MongoDB for that `slug`, and dynamically generate the worksheets for you:
+1. **Master Sheet**: The very first worksheet will be formatted to include all questions globally from your survey.
+2. **Dynamic Team Worksheets**: If any `pages` within your MongoDB JSON define a `customData.sheetName` property (as seen in the JSON example above), the script will automatically instantiate separate tabs named identically to those sheet names. It will then precisely combine your survey's general questions alongside that specific page's questions to create perfectly isolated tabs (e.g., for routing specific 'Teams').
 
 ## 5. Adding Clickable Links (Markdown & HTML)
 The built-in Survey component is configured with a global text interceptor (`onTextMarkdown`). This means you do not need to manually configure DOM elements to display beautiful, natively branded links. You can safely place standard Markdown links or standard HTML `<a>` tags inside any text property (such as `title` or `description`) in your MongoDB form JSON.
