@@ -17,7 +17,7 @@ interface SurveyElement {
 
 async function populateGoogleSheet(slug: string) {
   if (!slug) {
-    console.error("Please provide a form slug! Usage: npx ts-node scripts/populateGoogleSheet.ts <slug>");
+    console.error("Please provide a form slug! Usage: node scripts/populateGoogleSheet/index.js <slug> (or npx ts-node scripts/populateGoogleSheet.ts <slug> in dev)");
     return;
   }
 
@@ -98,5 +98,5 @@ const args = process.argv.slice(2);
 if (args[0]) {
   populateGoogleSheet(args[0]).then(() => process.exit(0));
 } else {
-  console.log("Usage: npx ts-node scripts/populateGoogleSheet.ts <slug>");
+  console.log("Usage: node scripts/populateGoogleSheet/index.js <slug> (or npx ts-node scripts/populateGoogleSheet.ts <slug> in dev)");
 }

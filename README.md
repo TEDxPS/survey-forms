@@ -127,7 +127,22 @@ Instead of passing sensitive keys from the backend to the frontend, the data ing
 
 This structure permits every individual survey to securely leverage isolated Google Projects or Sheets without necessitating code alterations or app redeployment!
 
-## 4. Adding Clickable Links (Markdown & HTML)
+### Important: Initializing Google Sheet Headers
+Before your Google Sheet can correctly receive data, it **must be initialized with the appropriate column headers** (matching your survey's question IDs and titles). You can automate this configuration using the provided initialization script.
+
+**During Local Development:**
+```bash
+npx ts-node scripts/populateGoogleSheet.ts <your-form-slug>
+```
+
+**In Production (Docker Container):**
+```bash
+docker exec -it <your-container-name> node scripts/populateGoogleSheet/index.js <your-form-slug>
+```
+
+The script will authenticate using the credentials stored in MongoDB for that `slug` (or your `.env` fallback) and automatically format the first worksheet to perfectly match your survey's schema!
+
+## 5. Adding Clickable Links (Markdown & HTML)
 The built-in Survey component is configured with a global text interceptor (`onTextMarkdown`). This means you do not need to manually configure DOM elements to display beautiful, natively branded links. You can safely place standard Markdown links or standard HTML `<a>` tags inside any text property (such as `title` or `description`) in your MongoDB form JSON.
 
 The system will automatically intercept these on render and inject the project's Tailwind utility classes (e.g., `text-[#eb0028] underline...`) and safety attributes (`target="_blank" rel="noopener noreferrer"`).

@@ -35,6 +35,9 @@ RUN \
     else echo "Lockfile not found." && exit 1; \
     fi
 
+# Build standalone scripts so they can be run in production
+RUN npx -y @vercel/ncc build scripts/populateGoogleSheet.ts -o dist_scripts/populateGoogleSheet
+
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
@@ -47,6 +50,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/dist_scripts ./scripts
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
