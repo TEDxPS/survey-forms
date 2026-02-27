@@ -59,19 +59,9 @@ export async function POST(req: Request) {
     });
   }
 
-  if (!serviceAccountAuth) {
-    if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
-      serviceAccountAuth = new JWT({
-        email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        key: process.env.GOOGLE_PRIVATE_KEY?.split(String.raw`\n`).join("\n"),
-        scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-      });
-    }
-  }
-
-  if (serviceAccountAuth) {
+  if (serviceAccountAuth && googleConfig?.sheetId) {
     const doc = new GoogleSpreadsheet(
-      googleConfig?.sheetId || (process.env.GOOGLE_SHEET_ID as string),
+      googleConfig.sheetId,
       serviceAccountAuth
     );
     await doc.loadInfo(); // loads document properties and worksheets

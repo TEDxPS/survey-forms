@@ -1,4 +1,4 @@
-import { bucket as defaultBucket, storage as defaultStorage } from "@/libs/gcpbucket";
+
 import { createHash } from "crypto";
 import { Storage } from "@google-cloud/storage";
 import dbConnect from "@/libs/mongodb";
@@ -27,21 +27,28 @@ export async function POST(req: Request) {
           targetBucketId = form.google.bucketId;
         }
 
-        if (form.google.apiKey && form.google.apiKey.includes('private_key')) {
+        if (form.google.private_key && form.google.client_email) {
           try {
-            const credentials = typeof form.google.apiKey === 'string'
-              ? JSON.parse(form.google.apiKey)
-              : form.google.apiKey;
-            customStorage = new Storage({ credentials });
+            customStorage = new Storage({
+              credentials: {
+                client_email: form.google.client_email,
+                private_key: typeof form.google.private_key === 'string'
+                  ? form.google.private_key.replace(/\\n/g, '\n')
+                  : form.google.private_key,
+              }
+            });
           } catch (e) {
-            console.error("Failed to parse provided apiKey as JSON:", e);
+            console.error("Failed to parse provided Google credentials:", e);
           }
         }
       }
     }
 
-    const storageToUse = customStorage || defaultStorage;
-    const bucket = targetBucketId ? storageToUse.bucket(targetBucketId) : defaultBucket;
+    if (!customStorage || !targetBucketId) {
+      return Response.json({ error: "No Google Cloud configuration found for this form." }, { status: 400 });
+    }
+
+    const bucket = customStorage.bucket(targetBucketId);
 
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());

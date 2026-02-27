@@ -48,11 +48,6 @@ To natively instantiate the container while securely bootstrapping all configura
 ```bash
 docker run -p 3000:3000 \
   -e MONGO_URI="mongodb://your-mongo-uri" \
-  -e GOOGLE_PROJECT_ID="your-gcp-project-id" \
-  -e GOOGLE_SERVICE_ACCOUNT_EMAIL="your-service-account-email" \
-  -e GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..." \
-  -e GOOGLE_SHEET_ID="your-global-sheet-fallback" \
-  -e GOOGLE_BUCKET_NAME="your-global-bucket-fallback" \
   recruitment-form:latest
 ```
 
@@ -122,8 +117,7 @@ Instead of passing sensitive keys from the backend to the frontend, the data ing
 3. **Dynamic Credentials**: 
    - If `google.private_key` and `google.client_email` exist (by directly pasting the `google-services.json` properties), the backend uses them and instantiates a customized network connection context for that specific submission or upload instance. 
    - If `google.sheetId` or `google.bucketId` exist, data is routed specifically to those endpoints.
-4. **Environment Fallback**: If the `google` object is omitted in MongoDB or keys are empty, the backend gracefully falls back to the system's global `.env` configuration (`GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_PRIVATE_KEY`, `GOOGLE_SHEET_ID`, `GOOGLE_BUCKET_NAME`).
-5. **Multi-Tenant MongoDB Storage**: Before submission to Google Sheets, the backend natively routes the user's payload into a dynamically generated **MongoDB Database named identically to the form's `slug`**. The raw form metrics are strictly isolated within a `formsubmissions` collection specific to that database, ensuring perfectly siloed validations (e.g. duplicate email checking) and unpolluted data pipelines.
+4. **Multi-Tenant MongoDB Storage**: Before submission to Google Sheets, the backend natively routes the user's payload into a dynamically generated **MongoDB Database named identically to the form's `slug`**. The raw form metrics are strictly isolated within a `formsubmissions` collection specific to that database, ensuring perfectly siloed validations (e.g. duplicate email checking) and unpolluted data pipelines.
 
 This structure permits every individual survey to securely leverage isolated Google Projects or Sheets without necessitating code alterations or app redeployment!
 
@@ -140,7 +134,7 @@ npx ts-node scripts/populateGoogleSheet.ts <your-form-slug>
 docker exec -it <your-container-name> node scripts/populateGoogleSheet/index.js <your-form-slug>
 ```
 
-The script will authenticate using the credentials stored in MongoDB for that `slug` (or your `.env` fallback) and automatically format the first worksheet to perfectly match your survey's schema!
+The script will authenticate using the credentials stored in MongoDB for that `slug` and automatically format the first worksheet to perfectly match your survey's schema!
 
 ## 5. Adding Clickable Links (Markdown & HTML)
 The built-in Survey component is configured with a global text interceptor (`onTextMarkdown`). This means you do not need to manually configure DOM elements to display beautiful, natively branded links. You can safely place standard Markdown links or standard HTML `<a>` tags inside any text property (such as `title` or `description`) in your MongoDB form JSON.

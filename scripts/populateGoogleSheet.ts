@@ -22,6 +22,7 @@ async function populateGoogleSheet(slug: string) {
   }
 
   await dbConnect();
+  // @ts-ignore: Mongoose findOne types can be complex, skipping strict check here
   const formDoc = await Form.findOne({ slug });
 
   if (!formDoc) {
@@ -33,23 +34,20 @@ async function populateGoogleSheet(slug: string) {
   const googleConfig = form.google || {};
 
   let serviceAccountAuth;
-  if (googleConfig && googleConfig.apiKey && googleConfig.apiKey.includes('private_key')) {
+  if (googleConfig && googleConfig.private_key && googleConfig.client_email) {
     try {
-      const credentials = typeof googleConfig.apiKey === 'string'
-        ? JSON.parse(googleConfig.apiKey)
-        : googleConfig.apiKey;
       serviceAccountAuth = new JWT({
-        email: credentials.client_email,
-        key: credentials.private_key,
+        email: googleConfig.client_email,
+        key: typeof googleConfig.private_key === 'string' ? googleConfig.private_key.replace(/\\n/g, '\n') : googleConfig.private_key,
         scopes: ['https://www.googleapis.com/auth/spreadsheets']
       });
     } catch (e) {
-      console.error("Failed to parse provided apiKey as JSON:", e);
+      console.error("Failed to configure Google JWT auth:", e);
     }
   }
 
   if (!serviceAccountAuth) {
-    console.error("No Google apiKey provided in MongoDB document. Cannot authenticate.");
+    console.error("No Google credentials provided in MongoDB document. Cannot authenticate.");
     return;
   }
 
