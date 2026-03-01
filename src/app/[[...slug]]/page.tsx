@@ -1,7 +1,9 @@
 import dynamic from 'next/dynamic';
 const SurveyComponent = dynamic(() => import("@/components/Survey"), { ssr: false });
 import Image from 'next/image';
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
+import dbConnect from "@/libs/mongodb";
+import Form from "@/models/Form";
 
 const keywords = [
   'TEDx',
@@ -32,7 +34,7 @@ const authors = [
   { name: 'TEDxPetalingStreet Info Tech Team' }
 ]
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "TEDxPetalingStreet Volunteer Application | Ideas Change Everything",
   description: "Join us in our journey of sharing inspiring Malaysian stories to showcase our brilliance to the world!",
   applicationName: 'TEDxPetalingStreet Volunteer Application',
@@ -46,7 +48,7 @@ export const metadata: Metadata = {
     siteName: 'TEDxPetalingStreet Volunteer Application | Ideas Change Everything',
     images: [
       {
-        url: 'https://forms.tedxpetalingstreet.com/tedx-hero.png',
+        url: 'https://forms.tedxpetalingstreet.com/tedx-hero.jpeg',
         width: 1200,
         height: 630,
         alt: 'TEDxPetalingStreet Main Image',
@@ -76,13 +78,56 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Homepage() {
+export async function generateMetadata({ params }: { params: { slug?: string[] } }): Promise<Metadata> {
+  let heroImage = '/tedx-hero.jpeg';
+  const slug = params?.slug?.[0] || '';
+
+  try {
+    await dbConnect();
+    const form = await Form.findOne({ slug });
+    if (form && form.heroImage) {
+      heroImage = form.heroImage;
+    }
+  } catch (e) {
+    console.error("Error fetching metadata:", e);
+  }
+
+  return {
+    ...baseMetadata,
+    openGraph: {
+      ...baseMetadata.openGraph,
+      images: [
+        {
+          url: heroImage.startsWith('http') ? heroImage : `https://forms.tedxpetalingstreet.com${heroImage}`,
+          width: 1200,
+          height: 630,
+          alt: 'TEDxPetalingStreet Main Image',
+        },
+      ],
+    }
+  };
+}
+
+export default async function Homepage({ params }: { params: { slug?: string[] } }) {
+  let heroImage = '/tedx-hero.jpeg';
+  const slug = params?.slug?.[0] || '';
+
+  try {
+    await dbConnect();
+    const form = await Form.findOne({ slug });
+    if (form && form.heroImage) {
+      heroImage = form.heroImage;
+    }
+  } catch (e) {
+    console.error("Error fetching form:", e);
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center bg-[#1c1c1c]">
       {/* Hero Section */}
       <div className="w-full relative h-[400px]">
         <Image
-          src="/tedx-hero.png"
+          src={heroImage}
           alt="TEDx Event Group Photo"
           fill
           className="object-cover"
@@ -90,19 +135,7 @@ export default function Homepage() {
         />
       </div>
 
-      {
-        // <div className="bg-white text-black rounded-lg my-8 w-4/5 md:w-1/3 p-4">
-        //   <p className="text-center font-bold text-2xl">Registration Closed | 报名已截止</p>
-        //   <p className="text-center mt-5">
-        //     Thank you for your interest! Volunter Registration for this year has ended.
-        //     We hope to see you next year! Stay tuned for updates and
-        //     announcements.
-        //     <br />
-        //     感谢您的关注！本年度的志工报名已经结束。欢迎您明年再来，敬请留意我们的最新消息和公告。
-        //   </p>
-        // </div>
-        <SurveyComponent />
-      }
+      <SurveyComponent />
     </div>
   );
 }

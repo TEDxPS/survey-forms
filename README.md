@@ -55,12 +55,13 @@ When a user visits a sub-path URL (e.g., `https://domain.com/survey-name`), the 
 The backend matches the `slug` against the `Form` collection in MongoDB. The JSON structure returned builds the Survey UI dynamically on the frontend. Safety is a priority: the `google` sensitive backend configuration is stripped out on the backend and is never exposed to the client.
 
 ## 2. MongoDB Document Format
-The MongoDB document structure is **exactly identical to a standard SurveyJS JSON configuration**, with the addition of custom root properties (`slug`, `expiry`, and `google`) that orchestrate our backend connectivity:
+The MongoDB document structure is **exactly identical to a standard SurveyJS JSON configuration**, with the addition of custom root properties (`slug`, `heroImage`, `expiry`, and `google`) that orchestrate our backend connectivity:
 
 ```json
 {
   "slug": "survey-name",
   "title": "Recruitment Form 2026",
+  "heroImage": "https://example.com/cover.jpg", // Optional: Dynamically sets the page's top responsive image and social media preview thumbnail
   "pages": [
     {
       "name": "introduction",
