@@ -80,28 +80,43 @@ const baseMetadata: Metadata = {
 
 export async function generateMetadata({ params }: { params: { slug?: string[] } }): Promise<Metadata> {
   let heroImage = '/tedx-hero.jpeg';
+  let title = baseMetadata.title;
+  let description = baseMetadata.description;
   const slug = params?.slug?.[0] || '';
 
   try {
     await dbConnect();
     const form = await Form.findOne({ slug });
-    if (form && form.heroImage) {
-      heroImage = form.heroImage;
+
+    if (form) {
+      if (form.heroImage) heroImage = form.heroImage;
+      if (form.title) title = form.title;
+      if (form.description) description = form.description;
     }
   } catch (e) {
     console.error("Error fetching metadata:", e);
   }
 
+  const currentUrl = `https://forms.tedxpetalingstreet.com${slug ? `/${slug}` : ''}`;
+
   return {
     ...baseMetadata,
+    title: title || undefined,
+    description: description || undefined,
+    alternates: {
+      canonical: currentUrl
+    },
     openGraph: {
       ...baseMetadata.openGraph,
+      title: title || undefined,
+      description: description || undefined,
+      url: currentUrl,
       images: [
         {
           url: heroImage.startsWith('http') ? heroImage : `https://forms.tedxpetalingstreet.com${heroImage}`,
           width: 1200,
           height: 630,
-          alt: 'TEDxPetalingStreet Main Image',
+          alt: (title as string) || 'TEDxPetalingStreet Main Image',
         },
       ],
     }
