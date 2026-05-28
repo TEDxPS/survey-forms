@@ -13,6 +13,7 @@ The forms are rendered using the [SurveyJS Form Library](https://surveyjs.io/for
 To run the application locally:
 
 ```bash
+cp .env.example .env
 npm install
 npm run dev
 ```
@@ -24,7 +25,7 @@ Open http://localhost:3000/ in your web browser.
 This project automatically builds and publishes a Docker image to GitHub Container Registry (GHCR). Next.js naturally handles environment variables during runtime so you only need to pull the image and inject the variables:
 
 ```bash
-docker pull ghcr.io/tedxps/survey-forms:latest
+docker pull ghcr.io/tedxps/survey-form:latest
 ```
 
 To natively instantiate the container while securely bootstrapping all configurations globally:
@@ -37,7 +38,7 @@ docker run -p 3000:3000 \
   -e GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..." \
   -e GOOGLE_SHEET_ID="your-global-sheet-fallback" \
   -e GOOGLE_BUCKET_NAME="your-global-bucket-fallback" \
-  ghcr.io/tedxps/survey-forms:latest
+  ghcr.io/tedxps/survey-form:latest
 ```
 
 **Building Manually**
