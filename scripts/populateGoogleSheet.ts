@@ -1,7 +1,9 @@
-import { JWT } from "google-auth-library";
-import { GoogleSpreadsheet } from "google-spreadsheet";
+import { JWT } from 'google-auth-library';
+import { GoogleSpreadsheet } from 'google-spreadsheet';
+import * as dotenv from 'dotenv';
 import dbConnect from "../src/libs/mongodb";
 import Form, { IForm } from "../src/models/Form";
+import { parsePrivateKey } from "@/libs/googleAuth";
 
 dotenv.config();
 
@@ -30,33 +32,31 @@ async function populateGoogleSheet(slug: string) {
   }
 
   const form = formDoc.toObject() as IForm;
-  const googleConfig = form.google || {};
+  const googleConfig = form.google;
 
-  let serviceAccountAuth;
-  if (googleConfig && googleConfig.private_key && googleConfig.client_email) {
-    try {
-      serviceAccountAuth = new JWT({
-        email: googleConfig.client_email,
-        key: typeof googleConfig.private_key === 'string' ? googleConfig.private_key.replace(/\\n/g, '\n') : googleConfig.private_key,
-        scopes: ['https://www.googleapis.com/auth/spreadsheets']
-      });
-    } catch (e) {
-      console.error("Failed to configure Google JWT auth:", e);
-    }
-  }
-
-  if (!serviceAccountAuth) {
+  if (!googleConfig?.private_key || !googleConfig?.client_email) {
     console.error("No Google credentials provided in MongoDB document. Cannot authenticate.");
     return;
   }
 
-  const sheetId = googleConfig.sheetId;
-  if (!sheetId) {
+  if (!googleConfig.sheetId) {
     console.error("No Google sheetId provided in MongoDB document.");
     return;
   }
 
-  const doc = new GoogleSpreadsheet(sheetId as string, serviceAccountAuth);
+  let serviceAccountAuth;
+  try {
+    serviceAccountAuth = new JWT({
+      email: googleConfig.client_email,
+      key: parsePrivateKey(googleConfig.private_key),
+      scopes: ['https://www.googleapis.com/auth/spreadsheets']
+    });
+  } catch (e) {
+    console.error("Failed to configure Google JWT auth:", e);
+    return;
+  }
+
+  const doc = new GoogleSpreadsheet(googleConfig.sheetId as string, serviceAccountAuth);
   await doc.loadInfo(); // loads document properties and worksheets
 
   // Extract all questions from the form
@@ -84,7 +84,7 @@ async function populateGoogleSheet(slug: string) {
   await firstSheet.resize({ rowCount: 500, columnCount: combinedHeaders.length });
   await firstSheet.setHeaderRow(combinedHeaders);
 
-  // Add the descriptions row (acting as the user-friendly header)
+  // Add the description row (acting as the user-friendly header)
   await firstSheet.addRow(combinedDescriptions);
 
   console.log(`Successfully initialized first sheet of '${doc.title}' with ${combinedHeaders.length} columns.`);

@@ -1,6 +1,7 @@
 import { JWT } from "google-auth-library";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import dbConnect from "@/libs/mongodb";
+import { parsePrivateKey } from "@/libs/googleAuth";
 import { getFormSubmissionModel } from "@/models/FormSubmission";
 import Form, { IForm } from "@/models/Form";
 
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
   if (googleConfig && googleConfig.private_key && googleConfig.client_email) {
     serviceAccountAuth = new JWT({
       email: googleConfig.client_email,
-      key: typeof googleConfig.private_key === 'string' ? googleConfig.private_key.replace(/\\n/g, '\n') : googleConfig.private_key,
+      key: parsePrivateKey(googleConfig.private_key),
       scopes: ['https://www.googleapis.com/auth/spreadsheets']
     });
   }
