@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "populate-sheet": "ts-node --project tsconfig.scripts.json scripts/populateGoogleSheet.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.15.2",
@@ -16,6 +17,7 @@
     "dotenv": "^17.3.1",
     "google-auth-library": "^9.15.1",
     "google-spreadsheet": "^4.1.4",
+    "googleapis": "^172.0.0",
     "jspdf-autotable": "^5.0.7",
     "mongoose": "^8.12.1",
     "next": "^14.2.35",
@@ -42,6 +44,7 @@
     "eslint-config-next": "14.2.35",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
