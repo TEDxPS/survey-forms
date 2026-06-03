@@ -1,8 +1,7 @@
 import { JWT } from "google-auth-library";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import dbConnect from "../src/libs/mongodb";
-import Form from "../src/models/Form";
-import * as dotenv from "dotenv";
+import Form, { IForm } from "../src/models/Form";
 
 dotenv.config();
 
@@ -30,7 +29,7 @@ async function populateGoogleSheet(slug: string) {
     return;
   }
 
-  const form = formDoc.toObject();
+  const form = formDoc.toObject() as IForm;
   const googleConfig = form.google || {};
 
   let serviceAccountAuth;
