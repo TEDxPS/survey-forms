@@ -2,7 +2,7 @@
 import { createHash } from "crypto";
 import { Storage } from "@google-cloud/storage";
 import dbConnect from "@/libs/mongodb";
-import Form from "@/models/Form";
+import Form, { IForm } from "@/models/Form";
 
 export const dynamic = "force-dynamic";
 

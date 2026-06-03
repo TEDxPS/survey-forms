@@ -3,7 +3,7 @@ const SurveyComponent = dynamic(() => import("@/components/Survey"), { ssr: fals
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import dbConnect from "@/libs/mongodb";
-import Form from "@/models/Form";
+import Form, { IForm } from "@/models/Form";
 
 const keywords = [
   'TEDx',
@@ -86,12 +86,12 @@ export async function generateMetadata({ params }: { params: { slug?: string[] }
 
   try {
     await dbConnect();
-    const form = await Form.findOne({ slug });
+    const form = await Form.findOne({ slug }) as IForm | null;
 
     if (form) {
       if (form.heroImage) heroImage = form.heroImage;
       if (form.title) title = form.title;
-      if (form.description) description = form.description;
+      if ((form as any).description) description = (form as any).description;
     }
   } catch (e) {
     console.error("Error fetching metadata:", e);
@@ -129,7 +129,7 @@ export default async function Homepage({ params }: { params: { slug?: string[] }
 
   try {
     await dbConnect();
-    const form = await Form.findOne({ slug });
+    const form = await Form.findOne({ slug }) as IForm | null;
     if (form && form.heroImage) {
       heroImage = form.heroImage;
     }

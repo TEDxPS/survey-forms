@@ -2,7 +2,7 @@ import { JWT } from "google-auth-library";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import dbConnect from "@/libs/mongodb";
 import { getFormSubmissionModel } from "@/models/FormSubmission";
-import Form from "@/models/Form";
+import Form, { IForm } from "@/models/Form";
 
 export const dynamic = "force-dynamic";
 
@@ -43,11 +43,11 @@ export async function POST(req: Request) {
   await submission.save();
 
   let googleConfig = null;
-  let formObj: any = null;
+  let formObj: IForm | null = null;
   if (slug) {
     const form = await Form.findOne({ slug });
     if (form) {
-      formObj = form.toObject();
+      formObj = form.toObject() as IForm;
       if (formObj.google) {
         googleConfig = formObj.google;
       }
