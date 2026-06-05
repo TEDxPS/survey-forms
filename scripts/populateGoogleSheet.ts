@@ -6,6 +6,11 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
+interface SurveyRow {
+  value: string;
+  text: string;
+}
+
 interface SurveyElement {
   type: string;
   name: string;
@@ -13,6 +18,7 @@ interface SurveyElement {
   elements?: SurveyElement[];
   html?: string;
   isRequired?: boolean;
+  rows?: SurveyRow[];
 }
 
 async function populateGoogleSheet(slug: string) {
@@ -64,16 +70,26 @@ async function populateGoogleSheet(slug: string) {
   const allQuestions = (form.pages || [])
     .flatMap((page: any) => page.elements || [])
     .flatMap((element: SurveyElement) => {
-      // Handle panels which might have nested elements
       if (element.type === "panel" && element.elements) {
         return element.elements.filter((e) => e.type !== "html" && e.type !== "expression");
       }
       return (element.type !== "html" && element.type !== "expression") ? [element] : [];
     })
-    .map((element: SurveyElement) => ({
-      id: element.name,
-      title: element.title || element.name,
-    }));
+    .flatMap((element: SurveyElement) => {
+      // Expand matrix rows into individual entries
+      if (element.type === "matrix" && element.rows) {
+        return element.rows.map((row: SurveyRow) => {
+          return {
+            id: `${element.name}[${row.value}]`,
+            title: `${element.title} - ${row.text}`,
+          };
+        });
+      }
+      return [{
+        id: element.name,
+        title: element.title || element.name,
+      }];
+    });
 
   const defaultHeaders = ["Submission ID", "Timestamp"];
   const combinedHeaders = [...defaultHeaders, ...allQuestions.map((q: any) => q.id)];
