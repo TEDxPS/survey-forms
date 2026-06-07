@@ -181,3 +181,34 @@ The system will automatically intercept these on render and inject the project's
 ```
 
 Both approaches will render identically out of the box with the correct project styling applied globally inside the survey!
+
+### Supporting Matrix Type Questions
+
+Matrix questions require special handling during Google Sheet header generation. Headers are derived from the question's `title` combined with each defined `rows` value, producing one column per row.
+
+Given the following question definition:
+
+```json
+{
+  "type": "matrix",
+  "name": "meal_preference",
+  "title": "What's your meal preference?",
+  "columns": [
+    "Western",
+    "Asian",
+    "Middle Eastern"
+  ],
+  "rows": [
+    "Breakfast",
+    "Lunch",
+    "Dinner"
+  ],
+  "cellType": "checkbox"
+}
+```
+
+The script automatically generates a column per row, prefixed by the question title:
+
+| What's your meal preference? - Breakfast | What's your meal preference? - Lunch | What's your meal preference? - Dinner |
+|---|---|---|
+| Asian | Western | Western, Middle Eastern |

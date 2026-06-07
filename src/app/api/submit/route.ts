@@ -16,16 +16,30 @@ export async function POST(req: Request) {
   console.log('Original data:', data);
 
   const processedData = Object.fromEntries(
-    Object.entries(data).map(([key, value]) => [
-      key,
-      typeof value === 'object' && value !== null
-        ? Array.isArray(value)
-          ? value.map(v => typeof v === 'object' && v !== null && 'content' in v ? v.content : (typeof v === 'object' && v !== null && 'value' in v ? v.value : v)).join(String.fromCharCode(10))
-          : 'value' in value
-            ? value.value
-            : String(value)
-        : String(value)
-    ])
+    Object.entries(data).flatMap(([key, value]) => {
+      if (
+        value &&
+        typeof value === 'object' &&
+        'value' in value &&
+        value.value &&
+        typeof value.value === 'object' &&
+        !Array.isArray(value.value)
+      ) {
+        return Object.entries(value.value).map(([subKey, subValue]) => [
+          `${key}[${subKey}]`,
+          Array.isArray(subValue)
+            ? subValue.join(', ')
+            : String(subValue)
+        ]);
+      }
+
+      return [[
+        key,
+        value && typeof value === 'object' && 'value' in value
+          ? String(value.value)
+          : String(value)
+      ]];
+    })
   );
   console.log('Processed data:', processedData);
 
