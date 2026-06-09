@@ -104,7 +104,7 @@ export default function SurveyComponent() {
             }
         };
 
-        loadSurveyData();
+        loadSurveyData().then();
 
         return () => {
             isMounted = false;

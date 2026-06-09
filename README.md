@@ -27,7 +27,7 @@ Open http://localhost:3000/ in your web browser.
 ### 透过 Docker 执行（推荐）/ Running via Docker (Recommended)
 
 此项目会自动建置 Docker 映像档并发布至 GitHub Container Registry (GHCR)。Next.js 在运行时原生处理环境变数，因此只需拉取映像档并注入变数即可：\
-This project automatically builds and publishes a Docker image to GitHub Container Registry (GHCR). Next.js naturally handles environment variables during runtime so you only need to pull the image and inject the variables:
+This project automatically builds and publishes a Docker image to GitHub Container Registry (GHCR). Next.js naturally handles environment variables during runtime, so you only need to pull the image and inject the variables:
 
 ```bash
 docker pull ghcr.io/tedxps/survey-form:latest
@@ -122,19 +122,19 @@ The MongoDB document structure is exactly identical to a standard SurveyJS JSON 
 各根属性说明：\
 Root property reference:
 
-| 字段<br>Field | 必填<br>Required | 说明<br>Description |
-|---|---|---|
-| `slug` | ✅ | URL 路径识别码，需与访问路径一致<br>URL path identifier, must match the visited path |
-| `title` | ✅ | 表单标题，显示于页面与社交预览<br>Form title shown on the page and social preview |
-| `heroImage` | ❌ | 页面顶部响应式图片的 URL，同时作为社交媒体缩略图<br>URL for the top responsive hero image, also used as the social media thumbnail |
-| `pages` | ✅ | SurveyJS 页面与问题定义（见 `pages` 参数详解）<br>SurveyJS page and question definitions (see `pages` field reference) |
-| `expiry.date` | ❌ | ISO 格式过期时间，过期后显示 `expiry.message`<br>ISO expiration datetime; shows `expiry.message` after this time |
-| `expiry.message` | ❌ | 过期后显示的 HTML 讯息<br>HTML message shown upon expiry |
-| `allowDuplicateEmails` | ❌ | 设为 `false` 时启用重复 Email 检查，默认为 `true`<br>Set to `false` to enable duplicate email validation, defaults to `true` |
-| `google.sheetId` | ❌ | 目标 Google Sheet ID<br>Target Google Sheet ID |
-| `google.driveFolderId` | ❌ | 档案上传的目标 Google Drive 资料夹 ID<br>Target Google Drive folder ID for file uploads |
-| `google.client_email` | ✅* | Service Account 的 Email（需有 Sheet 编辑权限）<br>Service Account email (must have Editor access to the Sheet) |
-| `google.private_key` | ✅* | Service Account 的私钥<br>Service Account private key |
+| 字段<br>Field            | 必填<br>Required | 说明<br>Description                                                                                               |
+|------------------------|----------------|-----------------------------------------------------------------------------------------------------------------|
+| `slug`                 | ✅              | URL 路径识别码，需与访问路径一致<br>URL path identifier, must match the visited path                                          |
+| `title`                | ✅              | 表单标题，显示于页面与社交预览<br>Form title shown on the page and social preview                                              |
+| `heroImage`            | ❌              | 页面顶部响应式图片的 URL，同时作为社交媒体缩略图<br>URL for the top responsive hero image, also used as the social media thumbnail    |
+| `pages`                | ✅              | SurveyJS 页面与问题定义（见 `pages` 参数详解）<br>SurveyJS page and question definitions (see `pages` field reference)        |
+| `expiry.date`          | ❌              | ISO 格式过期时间，过期后显示 `expiry.message`<br>ISO expiration datetime; shows `expiry.message` after this time            |
+| `expiry.message`       | ❌              | 过期后显示的 HTML 讯息<br>HTML message shown upon expiry                                                                |
+| `allowDuplicateEmails` | ❌              | 设为 `false` 时启用重复 Email 检查，默认为 `true`<br>Set to `false` to enable duplicate email validation, defaults to `true` |
+| `google.sheetId`       | ❌              | 目标 Google Sheet ID<br>Target Google Sheet ID                                                                    |
+| `google.driveFolderId` | ❌              | 档案上传的目标 Google Drive 资料夹 ID<br>Target Google Drive folder ID for file uploads                                   |
+| `google.client_email`  | ✅*             | Service Account 的 Email（需有 Sheet 编辑权限）<br>Service Account email (must have Editor access to the Sheet)          |
+| `google.private_key`   | ✅*             | Service Account 的私钥<br>Service Account private key                                                              |
 
 > ✅* 若需使用 Google Sheets 或 Google Drive 功能，`client_email` 与 `private_key` 为必填。\
 > ✅* Required if Google Sheets or Google Drive features are needed.
@@ -266,5 +266,5 @@ Given the following question definition:
 The script automatically generates a column per row, prefixed by the question title:
 
 | What's your meal preference? - Breakfast | What's your meal preference? - Lunch | What's your meal preference? - Dinner |
-|---|---|---|
-| Asian | Western | Western, Middle Eastern |
+|------------------------------------------|--------------------------------------|---------------------------------------|
+| Asian                                    | Western                              | Western, Middle Eastern               |

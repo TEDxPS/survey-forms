@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-export interface IAdminUser {
-  _id: string;
-  username: string;
-  passwordHash: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// export interface IAdminUser {
+//   _id: string;
+//   username: string;
+//   passwordHash: string;
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
 
 const AdminUserSchema = new mongoose.Schema(
   {

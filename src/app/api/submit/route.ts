@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
   if (serviceAccountAuth && googleConfig?.sheetId) {
     const doc = new GoogleSpreadsheet(
-      googleConfig.sheetId,
+      googleConfig?.sheetId,
       serviceAccountAuth
     );
     await doc.loadInfo(); // loads document properties and worksheets

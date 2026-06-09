@@ -3,7 +3,7 @@
 ## 概述 / Overview
 
 此脚本会读取 MongoDB 中指定表单的问题结构，并自动在对应的 Google Sheet 中初始化表头栏位。每次新建表单时需执行一次，之后提交的回应才能正确对应到各栏位。\
-This script reads a form's question structure from MongoDB and initializes the header columns in the corresponding Google Sheet. Run it once whenever a new form is created, so that future submissions map correctly to their columns.
+This script reads a form's question structure from MongoDB and initializes the header columns in the corresponding Google Sheet. Run it once whenever a new form is created so that future submissions map correctly to their columns.
 
 ---
 
@@ -40,9 +40,9 @@ npm run populate-sheet -- <slug>
 
 ### 参数 / Parameters
 
-| 参数<br>Parameter | 必填<br>Required | 说明<br>Description |
-|---|---|---|
-| `slug` | ✅ | 表单在 MongoDB 中的唯一识别码<br>The unique identifier of the form in MongoDB |
+| 参数<br>Parameter | 必填<br>Required | 说明<br>Description                                                   |
+|-----------------|----------------|---------------------------------------------------------------------|
+| `slug`          | ✅              | 表单在 MongoDB 中的唯一识别码<br>The unique identifier of the form in MongoDB |
 
 ### 范例 / Examples
 
@@ -125,22 +125,22 @@ Each item in the `pages` array represents one page of the form and supports the 
 
 ### 页面级字段 / Page-level Fields
 
-| 字段<br>Field | 类型<br>Type | 必填<br>Required | 说明<br>Description |
-|---|---|---|---|
-| `name` | `string` | ✅ | 页面的唯一识别码（不显示给用户）<br>Unique page identifier (not shown to users) |
-| `elements` | `array` | ✅ | 该页面包含的问题列表<br>List of questions on this page |
-| `readTimeEnforcement` | `number` | ❌ | 强制阅读秒数，倒数结束前「下一步」按钮为禁用状态<br>Seconds users must wait before the Next button is enabled |
-| `customData.sheetName` | `string` | ❌ | 指定后，此页问题会路由到独立的 Google Sheet 分页<br>If set, this page's questions are routed to a separate tab |
+| 字段<br>Field            | 类型<br>Type | 必填<br>Required | 说明<br>Description                                                                             |
+|------------------------|------------|----------------|-----------------------------------------------------------------------------------------------|
+| `name`                 | `string`   | ✅              | 页面的唯一识别码（不显示给用户）<br>Unique page identifier (not shown to users)                               |
+| `elements`             | `array`    | ✅              | 该页面包含的问题列表<br>List of questions on this page                                                  |
+| `readTimeEnforcement`  | `number`   | ❌              | 强制阅读秒数，倒数结束前「下一步」按钮为禁用状态<br>Seconds users must wait before the Next button is enabled         |
+| `customData.sheetName` | `string`   | ❌              | 指定后，此页问题会路由到独立的 Google Sheet 分页<br>If set, this page's questions are routed to a separate tab |
 
 ### `elements` 问题字段 / `elements` Question Fields
 
-| 字段<br>Field | 类型<br>Type | 必填<br>Required | 说明<br>Description |
-|---|---|---|---|
-| `type` | `string` | ✅ | 问题类型（见下方类型表）<br>Question type (see type table below) |
-| `name` | `string` | ✅ | 问题的唯一识别码，会成为 Google Sheet 的 header key<br>The unique question ID, used as the Google Sheet header key |
-| `title` | `string` | ❌ | 显示给用户的问题文字；省略时使用 `name`<br>Question text shown to users; falls back to `name` if omitted |
-| `isRequired` | `boolean` | ❌ | 设为 `true` 时此题为必填<br>Set to `true` to make this question mandatory |
-| `elements` | `array` | ❌ | 仅 `panel` 类型使用，内含子问题列表<br>Only used by `panel` type to contain nested questions |
+| 字段<br>Field  | 类型<br>Type | 必填<br>Required | 说明<br>Description                                                                                     |
+|--------------|------------|----------------|-------------------------------------------------------------------------------------------------------|
+| `type`       | `string`   | ✅              | 问题类型（见下方类型表）<br>Question type (see type table below)                                                  |
+| `name`       | `string`   | ✅              | 问题的唯一识别码，会成为 Google Sheet 的 header key<br>The unique question ID, used as the Google Sheet header key |
+| `title`      | `string`   | ❌              | 显示给用户的问题文字；省略时使用 `name`<br>Question text shown to users; falls back to `name` if omitted              |
+| `isRequired` | `boolean`  | ❌              | 设为 `true` 时此题为必填<br>Set to `true` to make this question mandatory                                     |
+| `elements`   | `array`    | ❌              | 仅 `panel` 类型使用，内含子问题列表<br>Only used by `panel` type to contain nested questions                       |
 
 ### 支援的问题类型 / Supported Question Types
 
@@ -151,12 +151,12 @@ The following types are extracted as Sheet columns. `html` and `expression` type
 
 #### `text` — 单行文字 / Single-line Text
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `inputType` | 输入格式，如 `"email"`、`"number"`、`"date"`、`"tel"`、`"url"`，默认为 `"text"`<br>Input format, e.g. `"email"`, `"number"`, `"date"`, `"tel"`, `"url"`, defaults to `"text"` |
-| `placeholder` | 输入框提示文字<br>Placeholder text shown inside the input |
-| `maxLength` | 最大字元数<br>Maximum number of characters |
-| `validators` | 验证规则（见 SurveyJS 文档）<br>Validation rules (see SurveyJS docs) |
+| 可用字段<br>Field | 说明<br>Description                                                                                                                                               |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `inputType`   | 输入格式，如 `"email"`、`"number"`、`"date"`、`"tel"`、`"url"`，默认为 `"text"`<br>Input format, e.g. `"email"`, `"number"`, `"date"`, `"tel"`, `"url"`, defaults to `"text"` |
+| `placeholder` | 输入框提示文字<br>Placeholder text shown inside the input                                                                                                              |
+| `maxLength`   | 最大字元数<br>Maximum number of characters                                                                                                                           |
+| `validators`  | 验证规则（见 SurveyJS 文档）<br>Validation rules (see SurveyJS docs)                                                                                                     |
 
 ```json
 { "type": "text", "name": "email", "title": "Email Address", "inputType": "email", "isRequired": true }
@@ -168,11 +168,11 @@ The following types are extracted as Sheet columns. `html` and `expression` type
 
 #### `comment` — 多行文字 / Multi-line Text
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `rows` | 文字框预设显示行数，默认 `4`<br>Number of visible rows, defaults to `4` |
-| `maxLength` | 最大字元数<br>Maximum number of characters |
-| `placeholder` | 提示文字<br>Placeholder text |
+| 可用字段<br>Field | 说明<br>Description                                           |
+|---------------|-------------------------------------------------------------|
+| `rows`        | 文字框预设显示行数，默认 `4`<br>Number of visible rows, defaults to `4` |
+| `maxLength`   | 最大字元数<br>Maximum number of characters                       |
+| `placeholder` | 提示文字<br>Placeholder text                                    |
 
 ```json
 { "type": "comment", "name": "motivation", "title": "Why do you want to join?", "rows": 6, "maxLength": 500 }
@@ -182,11 +182,11 @@ The following types are extracted as Sheet columns. `html` and `expression` type
 
 #### `radiogroup` — 单选题 / Single Choice
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `choices` | ✅ 必填，选项列表，每项为 `{ "value": "...", "text": "..." }` 或纯字串<br>Required, list of choices, each as `{ "value": "...", "text": "..." }` or a plain string |
-| `hasOther` | 设为 `true` 时加入「其他」选项，用户可自填文字<br>Set to `true` to add an "Other" option with free-text input |
-| `colCount` | 选项排列栏数，`0` = 横排全部，`1`（默认）= 每行一项<br>Number of columns for layout, `0` = all in one row, `1` (default) = one per row |
+| 可用字段<br>Field | 说明<br>Description                                                                                                                                  |
+|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `choices`     | ✅ 必填，选项列表，每项为 `{ "value": "...", "text": "..." }` 或纯字串<br>Required, list of choices, each as `{ "value": "...", "text": "..." }` or a plain string |
+| `hasOther`    | 设为 `true` 时加入「其他」选项，用户可自填文字<br>Set to `true` to add an "Other" option with free-text input                                                         |
+| `colCount`    | 选项排列栏数，`0` = 横排全部，`1`（默认）= 每行一项<br>Number of columns for layout, `0` = all in one row, `1` (default) = one per row                                 |
 
 ```json
 {
@@ -223,12 +223,12 @@ The following types are extracted as Sheet columns. `html` and `expression` type
 
 #### `checkbox` — 多选题 / Multiple Choice
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `choices` | ✅ 必填，格式同 `radiogroup`<br>Required, same format as `radiogroup` |
-| `hasOther` | 是否加入「其他」自填项<br>Whether to add an "Other" free-text option |
-| `hasSelectAll` | 是否显示「全选」按钮<br>Whether to show a "Select All" button |
-| `hasNone` | 是否显示「以上皆非」选项<br>Whether to show a "None of the above" option |
+| 可用字段<br>Field        | 说明<br>Description                                                         |
+|----------------------|---------------------------------------------------------------------------|
+| `choices`            | ✅ 必填，格式同 `radiogroup`<br>Required, same format as `radiogroup`            |
+| `hasOther`           | 是否加入「其他」自填项<br>Whether to add an "Other" free-text option                 |
+| `hasSelectAll`       | 是否显示「全选」按钮<br>Whether to show a "Select All" button                       |
+| `hasNone`            | 是否显示「以上皆非」选项<br>Whether to show a "None of the above" option              |
 | `maxSelectedChoices` | 最多可选几项，`0` = 无限制<br>Maximum number of selectable choices, `0` = unlimited |
 
 ```json
@@ -251,10 +251,10 @@ The following types are extracted as Sheet columns. `html` and `expression` type
 
 #### `dropdown` — 下拉选单 / Dropdown
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `choices` | ✅ 必填，格式同 `radiogroup`<br>Required, same format as `radiogroup` |
-| `hasOther` | 是否加入「其他」自填项<br>Whether to add an "Other" free-text option |
+| 可用字段<br>Field | 说明<br>Description                                                                                          |
+|---------------|------------------------------------------------------------------------------------------------------------|
+| `choices`     | ✅ 必填，格式同 `radiogroup`<br>Required, same format as `radiogroup`                                             |
+| `hasOther`    | 是否加入「其他」自填项<br>Whether to add an "Other" free-text option                                                  |
 | `placeholder` | 选单未选时的提示文字，默认为 `"Select..."`<br>Placeholder text shown when nothing is selected, defaults to `"Select..."` |
 
 ```json
@@ -275,12 +275,12 @@ The following types are extracted as Sheet columns. `html` and `expression` type
 
 #### `boolean` — 是／否 / Yes or No
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `labelTrue` | 「是」那侧的显示文字，默认 `"Yes"`<br>Label for the true side, defaults to `"Yes"` |
-| `labelFalse` | 「否」那侧的显示文字，默认 `"No"`<br>Label for the false side, defaults to `"No"` |
-| `valueTrue` | 勾选时储存的值，默认 `true`<br>Value stored when toggled on, defaults to `true` |
-| `valueFalse` | 取消勾选时储存的值，默认 `false`<br>Value stored when toggled off, defaults to `false` |
+| 可用字段<br>Field | 说明<br>Description                                                          |
+|---------------|----------------------------------------------------------------------------|
+| `labelTrue`   | 「是」那侧的显示文字，默认 `"Yes"`<br>Label for the true side, defaults to `"Yes"`      |
+| `labelFalse`  | 「否」那侧的显示文字，默认 `"No"`<br>Label for the false side, defaults to `"No"`       |
+| `valueTrue`   | 勾选时储存的值，默认 `true`<br>Value stored when toggled on, defaults to `true`      |
+| `valueFalse`  | 取消勾选时储存的值，默认 `false`<br>Value stored when toggled off, defaults to `false` |
 
 ```json
 {
@@ -297,13 +297,13 @@ The following types are extracted as Sheet columns. `html` and `expression` type
 
 #### `rating` — 评分 / Rating Scale
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `rateMin` | 最小分值，默认 `1`<br>Minimum rating value, defaults to `1` |
-| `rateMax` | 最大分值，默认 `5`<br>Maximum rating value, defaults to `5` |
-| `rateStep` | 每格步进值，默认 `1`<br>Step between each rating value, defaults to `1` |
-| `minRateDescription` | 最低分旁显示的说明文字<br>Label displayed next to the minimum value |
-| `maxRateDescription` | 最高分旁显示的说明文字<br>Label displayed next to the maximum value |
+| 可用字段<br>Field        | 说明<br>Description                                               |
+|----------------------|-----------------------------------------------------------------|
+| `rateMin`            | 最小分值，默认 `1`<br>Minimum rating value, defaults to `1`            |
+| `rateMax`            | 最大分值，默认 `5`<br>Maximum rating value, defaults to `5`            |
+| `rateStep`           | 每格步进值，默认 `1`<br>Step between each rating value, defaults to `1` |
+| `minRateDescription` | 最低分旁显示的说明文字<br>Label displayed next to the minimum value        |
+| `maxRateDescription` | 最高分旁显示的说明文字<br>Label displayed next to the maximum value        |
 
 ```json
 {
@@ -321,11 +321,11 @@ The following types are extracted as Sheet columns. `html` and `expression` type
 
 #### `file` — 档案上传 / File Upload
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `acceptedTypes` | 允许的档案类型，如 `".pdf,.docx"` 或 `"image/*"`<br>Accepted file types, e.g. `".pdf,.docx"` or `"image/*"` |
-| `maxSize` | 单个档案最大 KB 数<br>Maximum file size in KB |
-| `allowMultiple` | 是否允许一次上传多个档案，默认 `false`<br>Whether to allow uploading multiple files at once, defaults to `false` |
+| 可用字段<br>Field     | 说明<br>Description                                                                                                              |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `acceptedTypes`   | 允许的档案类型，如 `".pdf,.docx"` 或 `"image/*"`<br>Accepted file types, e.g. `".pdf,.docx"` or `"image/*"`                              |
+| `maxSize`         | 单个档案最大 KB 数<br>Maximum file size in KB                                                                                         |
+| `allowMultiple`   | 是否允许一次上传多个档案，默认 `false`<br>Whether to allow uploading multiple files at once, defaults to `false`                              |
 | `storeDataAsText` | 是否将档案转为 Base64 储存，建议保持 `false`（使用 Google Drive 上传）<br>Whether to store file as Base64; keep `false` to use Google Drive upload |
 
 上传后 Google Sheet 中储存的值为 Google Drive 的 **webViewLink**（可公开查看的连结）。\
@@ -349,11 +349,11 @@ After upload, the value stored in Google Sheet is the Google Drive **webViewLink
 每一行是一个子题，各行共用同一组栏（`columns`）作为选项。\
 Each row is a sub-question; all rows share the same set of `columns` as choices.
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `rows` | ✅ 子题列表，每项为 `{ "value": "...", "text": "..." }`<br>Required, list of sub-questions, each as `{ "value": "...", "text": "..." }` |
-| `columns` | ✅ 共用选项列表，格式同 `rows`<br>Required, shared choice columns, same format as `rows` |
-| `isAllRowRequired` | 是否要求所有行都必须作答<br>Whether every row must be answered |
+| 可用字段<br>Field      | 说明<br>Description                                                                                                              |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `rows`             | ✅ 子题列表，每项为 `{ "value": "...", "text": "..." }`<br>Required, list of sub-questions, each as `{ "value": "...", "text": "..." }` |
+| `columns`          | ✅ 共用选项列表，格式同 `rows`<br>Required, shared choice columns, same format as `rows`                                                  |
+| `isAllRowRequired` | 是否要求所有行都必须作答<br>Whether every row must be answered                                                                             |
 
 ```json
 {
@@ -407,10 +407,10 @@ Supports Markdown link syntax: `[Link Text](https://url)` is rendered as a red h
 将多个问题组合成一个视觉区块，`panel` 本身不占 Google Sheet 栏位，只有内部的 `elements` 会产生栏位。\
 Groups multiple questions into a visual block. The panel itself creates no column; only its nested `elements` do.
 
-| 可用字段<br>Field | 说明<br>Description |
-|---|---|
-| `elements` | ✅ 子问题列表，支援所有问题类型（除 `panel` 嵌套自身）<br>Required, list of nested questions; supports all types except nested `panel` |
-| `title` | 群组标题，显示给用户<br>Group heading shown to users |
+| 可用字段<br>Field | 说明<br>Description                                                                                                |
+|---------------|------------------------------------------------------------------------------------------------------------------|
+| `elements`    | ✅ 子问题列表，支援所有问题类型（除 `panel` 嵌套自身）<br>Required, list of nested questions; supports all types except nested `panel` |
+| `title`       | 群组标题，显示给用户<br>Group heading shown to users                                                                       |
 
 ```json
 {
@@ -503,17 +503,17 @@ After running, the Google Sheet will look like this:
 
 **Sheet1（主分页 / Main tab）**
 
-| Submission ID | Timestamp | full_name | email | portfolio | … |
-|---|---|---|---|---|---|
-| *(header row — 程式码 ID)* | | | | | |
-| *(description row — 人类可读)* | | Full Name | Email Address | Portfolio Link | … |
+| Submission ID              | Timestamp | full_name | email         | portfolio      | … |
+|----------------------------|-----------|-----------|---------------|----------------|---|
+| *(header row — 程式码 ID)*    |           |           |               |                |   |
+| *(description row — 人类可读)* |           | Full Name | Email Address | Portfolio Link | … |
 
 **Editorial（自动建立的分页 / Auto-created tab）**
 
-| Submission ID | Timestamp | full_name | email | portfolio |
-|---|---|---|---|---|
-| *(header row)* | | | | |
-| *(description row)* | | Full Name | Email Address | Portfolio Link |
+| Submission ID       | Timestamp | full_name | email         | portfolio      |
+|---------------------|-----------|-----------|---------------|----------------|
+| *(header row)*      |           |           |               |                |
+| *(description row)* |           | Full Name | Email Address | Portfolio Link |
 
 > **注意 / Note:** 自动建立的分页包含通用问题（无 `customData.sheetName` 的页面）＋ 该分页专属问题，方便每个部门独立筛选回应。\
 > Auto-created tabs include general questions (pages without `customData.sheetName`) plus that tab's specific questions, so each department can filter responses independently.
@@ -522,13 +522,13 @@ After running, the Google Sheet will look like this:
 
 ## 常见错误 / Common Errors
 
-| 错误讯息<br>Error Message | 原因<br>Cause | 解法<br>Fix |
-|---|---|---|
-| `Form with slug '...' not found` | MongoDB 中找不到该 slug<br>Slug not found in MongoDB | 确认 slug 拼写正确，且文档已插入<br>Check the slug spelling and confirm the document is inserted |
-| `No Google credentials provided` | 文档缺少 `google.private_key` 或 `google.client_email`<br>Document missing `google.private_key` or `google.client_email` | 在 MongoDB 文档中补上 `google` 字段<br>Add the `google` field to the MongoDB document |
-| `No Google sheetId provided` | 文档缺少 `google.sheetId`<br>Document missing `google.sheetId` | 在 MongoDB 文档中补上 `google.sheetId`<br>Add `google.sheetId` to the MongoDB document |
-| `Permission denied` (Google API 403) | Service Account 没有 Sheet 编辑权限<br>Service Account lacks Editor access to the Sheet | 在 Google Sheet 中将 `client_email` 加为编辑者<br>Add `client_email` as an Editor in Google Sheet |
-| `Team sheet '...' already exists. Skipping` | 分页已存在，不会重复建立<br>Tab already exists, skipping creation | 正常提示，无需处理<br>Expected behaviour, no action needed |
+| 错误讯息<br>Error Message                       | 原因<br>Cause                                                                                                         | 解法<br>Fix                                                                                 |
+|---------------------------------------------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| `Form with slug '...' not found`            | MongoDB 中找不到该 slug<br>Slug not found in MongoDB                                                                     | 确认 slug 拼写正确，且文档已插入<br>Check the slug spelling and confirm the document is inserted       |
+| `No Google credentials provided`            | 文档缺少 `google.private_key` 或 `google.client_email`<br>Document missing `google.private_key` or `google.client_email` | 在 MongoDB 文档中补上 `google` 字段<br>Add the `google` field to the MongoDB document             |
+| `No Google sheetId provided`                | 文档缺少 `google.sheetId`<br>Document missing `google.sheetId`                                                          | 在 MongoDB 文档中补上 `google.sheetId`<br>Add `google.sheetId` to the MongoDB document          |
+| `Permission denied` (Google API 403)        | Service Account 没有 Sheet 编辑权限<br>Service Account lacks Editor access to the Sheet                                   | 在 Google Sheet 中将 `client_email` 加为编辑者<br>Add `client_email` as an Editor in Google Sheet |
+| `Team sheet '...' already exists. Skipping` | 分页已存在，不会重复建立<br>Tab already exists, skipping creation                                                               | 正常提示，无需处理<br>Expected behaviour, no action needed                                         |
 
 ---
 
@@ -537,6 +537,6 @@ After running, the Google Sheet will look like this:
 - **Sheet1 会被覆写**：每次执行都会重设 Sheet1 的 header 和描述行\
   **Sheet1 will be overwritten**: each run resets Sheet1's header and description rows
 - **自定义分页不会重复建立**：若分页已存在则跳过，不会删除现有数据\
-  **Custom tabs are not re-created**: if a tab already exists it is skipped — existing data is safe
+  **Custom tabs are not re-created**: if a tab already exists, it is skipped — existing data is safe
 - 建议在**表单上线前**执行，避免覆盖已有的提交数据\
   It is recommended to run this script **before the form goes live** to avoid overwriting existing submissions

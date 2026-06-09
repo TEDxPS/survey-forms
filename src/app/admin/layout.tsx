@@ -1,4 +1,5 @@
 import AdminNav from "./_components/AdminNav";
+import React from 'react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
