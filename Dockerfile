@@ -36,7 +36,7 @@ RUN \
     fi
 
 # Build standalone scripts so they can be run in production
-RUN npx -y @vercel/ncc build scripts/populateGoogleSheet.ts -o dist_scripts/populateGoogleSheet
+RUN NODE_OPTIONS="--max-old-space-size=4096" npx -y @vercel/ncc build scripts/populateGoogleSheet.ts -o dist_scripts/populateGoogleSheet
 
 # Production image, copy all the files and run next
 FROM base AS runner
