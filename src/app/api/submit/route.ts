@@ -1,8 +1,9 @@
 import { JWT } from "google-auth-library";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import dbConnect from "@/libs/mongodb";
+import { parsePrivateKey } from "@/libs/googleAuth";
 import { getFormSubmissionModel } from "@/models/FormSubmission";
-import Form from "@/models/Form";
+import Form, { IForm } from "@/models/Form";
 
 export const dynamic = "force-dynamic";
 
@@ -57,11 +58,11 @@ export async function POST(req: Request) {
   await submission.save();
 
   let googleConfig = null;
-  let formObj: any = null;
+  let formObj: IForm | null = null;
   if (slug) {
     const form = await Form.findOne({ slug });
     if (form) {
-      formObj = form.toObject();
+      formObj = form.toObject() as IForm;
       if (formObj.google) {
         googleConfig = formObj.google;
       }
@@ -72,14 +73,14 @@ export async function POST(req: Request) {
   if (googleConfig && googleConfig.private_key && googleConfig.client_email) {
     serviceAccountAuth = new JWT({
       email: googleConfig.client_email,
-      key: typeof googleConfig.private_key === 'string' ? googleConfig.private_key.replace(/\\n/g, '\n') : googleConfig.private_key,
+      key: parsePrivateKey(googleConfig.private_key),
       scopes: ['https://www.googleapis.com/auth/spreadsheets']
     });
   }
 
   if (serviceAccountAuth && googleConfig?.sheetId) {
     const doc = new GoogleSpreadsheet(
-      googleConfig.sheetId,
+      googleConfig?.sheetId,
       serviceAccountAuth
     );
     await doc.loadInfo(); // loads document properties and worksheets

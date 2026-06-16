@@ -55,6 +55,12 @@ export default function SurveyComponent() {
         const loadSurveyData = async () => {
             try {
                 const currentPath = window.location.pathname.replace(/^\/+/, "");
+                if (!currentPath) {
+                    if (isMounted) {
+                        setIsLoading(false);
+                    }
+                    return;
+                }
                 const res = await fetch(`/api/load?slug=${encodeURIComponent(currentPath)}`);
                 if (!res.ok) {
                     const errData = await res.json();
@@ -98,7 +104,7 @@ export default function SurveyComponent() {
             }
         };
 
-        loadSurveyData();
+        loadSurveyData().then();
 
         return () => {
             isMounted = false;
@@ -380,6 +386,15 @@ export default function SurveyComponent() {
             <div className="w-full flex flex-col items-center justify-center py-20 bg-[#1c1c1c]">
                 <div className="w-12 h-12 border-4 border-[#eb0028] border-t-transparent rounded-full animate-spin mb-4"></div>
                 <p className="text-white text-lg font-medium animate-pulse">Loading form...</p>
+            </div>
+        );
+    }
+
+    if (!surveyModel && !error) {
+        return (
+            <div className="w-full flex flex-col items-center justify-center py-20 bg-[#1c1c1c] text-white text-center px-4">
+                <p className="text-2xl font-bold mb-2">TEDxPetalingStreet</p>
+                <p className="text-gray-400">Please navigate to a specific form URL to get started.</p>
             </div>
         );
     }

@@ -1,8 +1,8 @@
-
-import { createHash } from "crypto";
-import { Storage } from "@google-cloud/storage";
+import { google } from "googleapis";
+import { Readable } from "stream";
+import { parsePrivateKey } from "@/libs/googleAuth";
 import dbConnect from "@/libs/mongodb";
-import Form from "@/models/Form";
+import Form, { IForm } from "@/models/Form";
 
 export const dynamic = "force-dynamic";
 
@@ -15,91 +15,61 @@ export async function POST(req: Request) {
       return Response.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    let targetBucketId = null;
-    let customStorage = null;
-
     const slug = formData.get("slug") as string;
-    if (slug) {
-      await dbConnect();
-      const form = await Form.findOne({ slug });
-      if (form && form.google) {
-        if (form.google.bucketId) {
-          targetBucketId = form.google.bucketId;
-        }
-
-        if (form.google.private_key && form.google.client_email) {
-          try {
-            customStorage = new Storage({
-              credentials: {
-                client_email: form.google.client_email,
-                private_key: typeof form.google.private_key === 'string'
-                  ? form.google.private_key.replace(/\\n/g, '\n')
-                  : form.google.private_key,
-              }
-            });
-          } catch (e) {
-            console.error("Failed to parse provided Google credentials:", e);
-          }
-        }
-      }
+    if (!slug) {
+      return Response.json({ error: "No form slug provided" }, { status: 400 });
     }
 
-    if (!customStorage || !targetBucketId) {
-      return Response.json({ error: "No Google Cloud configuration found for this form." }, { status: 400 });
+    await dbConnect();
+    const form = await Form.findOne({ slug }) as IForm | null;
+
+    if (!form?.google?.private_key || !form?.google?.client_email || !form?.google?.driveFolderId) {
+      return Response.json(
+        { error: "No Google Drive configuration found for this form." },
+        { status: 400 }
+      );
     }
 
-    const bucket = customStorage.bucket(targetBucketId);
+    const auth = new google.auth.JWT({
+      email: form.google.client_email,
+      key: parsePrivateKey(form.google.private_key),
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    });
 
-    // Convert file to buffer
+    const drive = google.drive({ version: "v3", auth });
+
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const fileNameHash = createHash("sha256").update(file.name).digest("hex");
-
-    // Create a unique filename to avoid collisions
-    const filename = `${Date.now()}-${fileNameHash}`;
-
-    // Create a write stream to GCP bucket
-    const blob = bucket.file(filename);
-    const blobStream = blob.createWriteStream({
-      resumable: false,
-      contentType: file.type,
+    const uploadResponse = await drive.files.create({
+      requestBody: {
+        name: file.name,
+        parents: [form.google.driveFolderId],
+      },
+      media: {
+        mimeType: file.type,
+        body: Readable.from(buffer),
+      },
+      fields: "id, webViewLink",
     });
 
-    // Handle errors during upload
-    const streamPromise = new Promise((resolve, reject) => {
-      blobStream.on("error", (err) => {
-        console.log("Error uploading file:", err);
-        reject(err);
-      });
+    const fileId = uploadResponse.data.id!;
 
-      blobStream.on("finish", () => {
-        // Make the file public to get URL
-
-        blob
-          .makePublic()
-          .then(() => {
-            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
-            resolve(publicUrl);
-          })
-          .catch(reject);
-      });
-
-      blobStream.end(buffer);
+    await drive.permissions.create({
+      fileId,
+      requestBody: {
+        role: "reader",
+        type: "anyone",
+      },
     });
-
-    const publicUrl = await streamPromise;
 
     return Response.json({
       success: true,
-      fileUrl: publicUrl,
+      fileUrl: uploadResponse.data.webViewLink,
     });
   } catch (error) {
     console.error("Upload error:", error);
     return Response.json(
-      {
-        success: false,
-        error: "Failed to upload file",
-      },
+      { success: false, error: "Failed to upload file" },
       { status: 500 }
     );
   }

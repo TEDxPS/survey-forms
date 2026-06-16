@@ -1,5 +1,5 @@
 import dbConnect from "@/libs/mongodb";
-import Form from "@/models/Form";
+import Form, { IForm } from "@/models/Form";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +34,7 @@ export async function GET(req: Request) {
             );
         }
 
-        const formObj = form.toObject();
+        const formObj = form.toObject() as IForm;
         if (formObj.google) {
             delete formObj.google;
         }
