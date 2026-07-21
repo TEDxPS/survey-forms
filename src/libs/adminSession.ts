@@ -87,13 +87,20 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
       sigBytes,
       enc.encode(b64)
     );
-    if (!valid) return null;
+    if (!valid) {
+      console.error("[verifyToken] DEBUG signature invalid, secretLen:", getSecret().length);
+      return null;
+    }
 
     const json = atob(b64.replace(/-/g, "+").replace(/_/g, "/") + "==");
     const payload: TokenPayload = JSON.parse(json);
-    if (Math.floor(Date.now() / 1000) > payload.exp) return null;
+    if (Math.floor(Date.now() / 1000) > payload.exp) {
+      console.error("[verifyToken] DEBUG token expired", payload.exp, Math.floor(Date.now() / 1000));
+      return null;
+    }
     return payload;
-  } catch {
+  } catch (err) {
+    console.error("[verifyToken] DEBUG threw:", err instanceof Error ? err.message : err);
     return null;
   }
 }
