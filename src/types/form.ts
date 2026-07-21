@@ -15,9 +15,12 @@ export interface IForm {
   allowDuplicateEmails?: boolean;
   google?: {
     sheetId?: string;
-    driveFolderId?: string;
     client_email: string;
     private_key: string;
     [key: string]: unknown;
+  };
+  fileStorage?: {
+    provider: string;
+    config: Record<string, unknown>;
   };
 }

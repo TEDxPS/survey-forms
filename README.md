@@ -3,8 +3,8 @@
 一个基于 Next.js 的动态问卷与招募表单应用，专为 TEDx 章节设计。此项目允许你从单一代码库提供多份不同的表单，完全由储存在 MongoDB 中的配置数据驱动。\
 A dynamic, Next.js-based survey and recruitment form application for TEDx chapters. This project allows you to serve multiple different forms from a single codebase, entirely driven by configuration data stored in MongoDB.
 
-表单使用 [SurveyJS Form Library](https://surveyjs.io/form-library/documentation/overview) 渲染，并整合自定义后端，负责处理验证、提交、档案上传，以及将数据安全路由至专属 Google Sheets 和 Google Drive。\
-The forms are rendered using the [SurveyJS Form Library](https://surveyjs.io/form-library/documentation/overview), integrated with a custom backend that handles validations, submissions, file uploads, and routing data securely to dedicated Google Sheets and Google Drive.
+表单使用 [SurveyJS Form Library](https://surveyjs.io/form-library/documentation/overview) 渲染，并整合自定义后端，负责处理验证、提交、档案上传（透过可插拔的档案储存供应商），以及将数据安全路由至专属 Google Sheets。\
+The forms are rendered using the [SurveyJS Form Library](https://surveyjs.io/form-library/documentation/overview), integrated with a custom backend that handles validations, submissions, file uploads (via a pluggable file storage provider system), and routing data securely to dedicated Google Sheets.
 
 ---
 
@@ -73,8 +73,8 @@ The backend matches the `slug` against the `Form` collection in MongoDB. The JSO
 
 ### 2. MongoDB 文档格式 / MongoDB Document Format
 
-MongoDB 文档结构与标准 SurveyJS JSON 配置完全一致，但额外引入自定义根属性（`slug`、`heroImage`、`expiry`、`google`）来编排后端连接：\
-The MongoDB document structure is exactly identical to a standard SurveyJS JSON configuration, but introduces custom root properties (`slug`, `heroImage`, `expiry`, and `google`) that orchestrate backend connectivity:
+MongoDB 文档结构与标准 SurveyJS JSON 配置完全一致，但额外引入自定义根属性（`slug`、`heroImage`、`expiry`、`fileStorage`、`google`）来编排后端连接：\
+The MongoDB document structure is exactly identical to a standard SurveyJS JSON configuration, but introduces custom root properties (`slug`, `heroImage`, `expiry`, `fileStorage`, and `google`) that orchestrate backend connectivity:
 
 ```json
 {
@@ -100,9 +100,14 @@ The MongoDB document structure is exactly identical to a standard SurveyJS JSON 
     "message": "<p>Registration is closed!</p>"
   },
   "allowDuplicateEmails": false,
+  "fileStorage": {
+    "provider": "gcs",
+    "config": {
+      "bucketId": "your-gcs-bucket-name"
+    }
+  },
   "google": {
     "sheetId": "1aBcDeFgHiJkLmNoPqRsTuVwXyZ...",
-    "driveFolderId": "your-drive-folder-id",
 
     "type": "service_account",
     "project_id": "your-project...",
@@ -131,38 +136,41 @@ Root property reference:
 | `expiry.date`          | ❌              | ISO 格式过期时间，过期后显示 `expiry.message`<br>ISO expiration datetime; shows `expiry.message` after this time            |
 | `expiry.message`       | ❌              | 过期后显示的 HTML 讯息<br>HTML message shown upon expiry                                                                |
 | `allowDuplicateEmails` | ❌              | 设为 `false` 时启用重复 Email 检查，默认为 `true`<br>Set to `false` to enable duplicate email validation, defaults to `true` |
+| `fileStorage.provider` | ❌              | 档案储存供应商的识别码，如 `"gcs"`（见 [docs/file-storage-providers.md](docs/file-storage-providers.md)）<br>File storage provider key, e.g. `"gcs"` (see [docs/file-storage-providers.md](docs/file-storage-providers.md)) |
+| `fileStorage.config`   | ❌              | 该供应商专属的设置，如 GCS 的 `bucketId`<br>Provider-specific settings, e.g. `bucketId` for GCS                              |
 | `google.sheetId`       | ❌              | 目标 Google Sheet ID<br>Target Google Sheet ID                                                                    |
-| `google.driveFolderId` | ❌              | 档案上传的目标 Google Drive 资料夹 ID<br>Target Google Drive folder ID for file uploads                                   |
-| `google.client_email`  | ✅*             | Service Account 的 Email（需有 Sheet 编辑权限）<br>Service Account email (must have Editor access to the Sheet)          |
+| `google.client_email`  | ✅*             | Service Account 的 Email（需有 Sheet 编辑权限，且为档案储存供应商所使用）<br>Service Account email (must have Editor access to the Sheet; also used by file storage providers) |
 | `google.private_key`   | ✅*             | Service Account 的私钥<br>Service Account private key                                                              |
 
-> ✅* 若需使用 Google Sheets 或 Google Drive 功能，`client_email` 与 `private_key` 为必填。\
-> ✅* Required if Google Sheets or Google Drive features are needed.
+> ✅* 若需使用 Google Sheets 或档案上传功能，`client_email` 与 `private_key` 为必填。\
+> ✅* Required if Google Sheets or file upload features are needed.
 
 ---
 
 ## 📊 整合与数据路由 / Integrations & Data Routing
 
-### Google Sheets 提交与 Drive 上传 / Google Sheets Submissions & Drive Uploads
+### Google Sheets 提交与档案上传 / Google Sheets Submissions & File Uploads
 
 系统不会将敏感密钥从后端传至前端，数据摄入机制以原生且安全的方式运作：\
 Instead of passing sensitive keys from the backend to the frontend, the data ingestion mechanism works natively and securely:
 
 1. **前端提交 / Frontend Submission:** 前端将用户的问卷数据或上传档案连同 `slug` 一并提交。\
    The frontend submits the user's survey data or uploaded files alongside the `slug`.
-2. **后端拦截 / Backend Interception:** 后端 `POST` 路由（`/api/submit`、`/api/upload`）提取 slug，并查询 MongoDB 获取该表单对应的凭证配置。\
-   The backend `POST` routes (`/api/submit`, `/api/upload`) extract the slug and query MongoDB to fetch the credentials mapping associated with that specific form.
+2. **后端拦截 / Backend Interception:** 后端 `POST` 路由（`/api/submit`、`/api/upload`）提取 slug，并查询 MongoDB 获取该表单对应的凭证与储存配置。\
+   The backend `POST` routes (`/api/submit`, `/api/upload`) extract the slug and query MongoDB to fetch the credentials and storage configuration associated with that specific form.
 3. **动态凭证 / Dynamic Credentials:**\
    Dynamic credential resolution:
-   - 若 `google.private_key` 和 `google.client_email` 存在，后端会为该次提交／上传实例化专属的网络连接上下文。\
-     If `google.private_key` and `google.client_email` exist, the backend instantiates a customized network connection context for that specific submission/upload.
-   - 若 `google.sheetId` 或 `google.driveFolderId` 存在，数据会被明确路由至这些端点。\
-     If `google.sheetId` or `google.driveFolderId` exist, data is explicitly routed to those endpoints.
+   - 若 `google.private_key` 和 `google.client_email` 存在，后端会为该次提交实例化专属的网络连接上下文。\
+     If `google.private_key` and `google.client_email` exist, the backend instantiates a customized network connection context for that specific submission.
+   - 若 `google.sheetId` 存在，数据会被明确路由至该 Sheet。\
+     If `google.sheetId` exists, data is explicitly routed to that Sheet.
+   - 档案上传则依据 `fileStorage.provider` 查找对应的档案储存供应商实现，并透过 `fileStorage.config` 中的专属设置（如 GCS 的 `bucketId`）完成上传。详见 [docs/file-storage-providers.md](docs/file-storage-providers.md)。\
+     File uploads look up the matching file storage provider implementation by `fileStorage.provider`, and complete the upload using the provider-specific settings in `fileStorage.config` (e.g. `bucketId` for GCS). See [docs/file-storage-providers.md](docs/file-storage-providers.md) for details.
 4. **多租户 MongoDB 储存 / Multi-Tenant MongoDB Storage:** 提交至 Google Sheets 之前，后端会将用户的载荷路由至一个**以表单 `slug` 命名的独立 MongoDB 数据库**。原始表单指标被严格隔离在该数据库专属的 `formsubmissions` collection 中，确保验证（如重复 Email 检查）和数据管线完全隔离。\
    Before submission to Google Sheets, the backend routes the user's payload into a dynamically generated **MongoDB database named identically to the form's `slug`**. The raw form metrics are strictly isolated within a `formsubmissions` collection specific to that database, ensuring perfectly siloed validations and unpolluted data pipelines.
 
-此架构允许每份问卷使用独立的 Google 项目或 Sheet，无需修改代码或重新部署应用！\
-This structure permits every survey to leverage isolated Google Projects or Sheets without necessitating code alterations or app redeployment!
+此架构允许每份问卷使用独立的 Google 项目、Sheet 或档案储存供应商，无需修改代码或重新部署应用！\
+This structure permits every survey to leverage isolated Google Projects, Sheets, or file storage providers without necessitating code alterations or app redeployment!
 
 ### 智能 Sheet 路由（主表 + 副本）/ Intelligent Sheet Routing (Master Insert + Carbon Copies)
 

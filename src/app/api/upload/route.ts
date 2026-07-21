@@ -1,8 +1,6 @@
-import { google } from "googleapis";
-import { Readable } from "stream";
-import { parsePrivateKey } from "@/libs/googleAuth";
 import dbConnect from "@/libs/mongodb";
 import Form, { IForm } from "@/models/Form";
+import { getFileStorageProvider } from "@/libs/fileStorage/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -21,56 +19,27 @@ export async function POST(req: Request) {
     }
 
     await dbConnect();
-    const form = await Form.findOne({ slug }) as IForm | null;
+    const form = (await Form.findOne({ slug })) as IForm | null;
 
-    if (!form?.google?.private_key || !form?.google?.client_email || !form?.google?.driveFolderId) {
+    const provider = getFileStorageProvider(form?.fileStorage?.provider);
+    if (!provider) {
       return Response.json(
-        { error: "No Google Drive configuration found for this form." },
+        { error: "No file storage provider configured for this form." },
         { status: 400 }
       );
     }
 
-    const auth = new google.auth.JWT({
-      email: form.google.client_email,
-      key: parsePrivateKey(form.google.private_key),
-      scopes: ["https://www.googleapis.com/auth/drive.file"],
-    });
-
-    const drive = google.drive({ version: "v3", auth });
-
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const uploadResponse = await drive.files.create({
-      requestBody: {
-        name: file.name,
-        parents: [form.google.driveFolderId],
-      },
-      media: {
-        mimeType: file.type,
-        body: Readable.from(buffer),
-      },
-      fields: "id, webViewLink",
-    });
+    const { url } = await provider.upload(
+      { buffer, filename: file.name, mimeType: file.type },
+      { google: form?.google, slug, config: form?.fileStorage?.config ?? {} }
+    );
 
-    const fileId = uploadResponse.data.id!;
-
-    await drive.permissions.create({
-      fileId,
-      requestBody: {
-        role: "reader",
-        type: "anyone",
-      },
-    });
-
-    return Response.json({
-      success: true,
-      fileUrl: uploadResponse.data.webViewLink,
-    });
+    return Response.json({ success: true, fileUrl: url });
   } catch (error) {
     console.error("Upload error:", error);
-    return Response.json(
-      { success: false, error: "Failed to upload file" },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Failed to upload file";
+    return Response.json({ success: false, error: message }, { status: 500 });
   }
 }

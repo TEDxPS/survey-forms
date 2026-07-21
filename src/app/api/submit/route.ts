@@ -34,12 +34,12 @@ export async function POST(req: Request) {
         ]);
       }
 
-      return [[
-        key,
-        value && typeof value === 'object' && 'value' in value
-          ? String(value.value)
-          : String(value)
-      ]];
+      const rawValue = value && typeof value === 'object' && 'value' in value ? value.value : value;
+      const stringValue = Array.isArray(rawValue)
+        ? rawValue.map((v) => (v && typeof v === 'object' && 'content' in v ? v.content : v)).join(',')
+        : String(rawValue);
+
+      return [[key, stringValue]];
     })
   );
   console.log('Processed data:', processedData);

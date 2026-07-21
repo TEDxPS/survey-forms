@@ -31,9 +31,10 @@ export default async function AdminFormsPage() {
         expiryStatus = new Date(f.expiry.date) > new Date() ? "active" : "expired";
       }
 
-      // Google config completeness
+      // Config completeness
       const hasSheet = Boolean(f.google?.sheetId);
-      const hasDrive = Boolean(f.google?.driveFolderId);
+      const hasFileStorage = Boolean(f.fileStorage?.provider) &&
+        Object.values(f.fileStorage?.config ?? {}).some(Boolean);
       const hasAuth  = Boolean(f.google?.client_email && f.google?.private_key);
 
       // Pages / questions count
@@ -53,7 +54,7 @@ export default async function AdminFormsPage() {
         expiryStatus,
         expiryDate,
         hasSheet,
-        hasDrive,
+        hasFileStorage,
         hasAuth,
         pageCount,
         questionCount,

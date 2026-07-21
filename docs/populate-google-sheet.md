@@ -326,10 +326,10 @@ The following types are extracted as Sheet columns. `html` and `expression` type
 | `acceptedTypes`   | 允许的档案类型，如 `".pdf,.docx"` 或 `"image/*"`<br>Accepted file types, e.g. `".pdf,.docx"` or `"image/*"`                              |
 | `maxSize`         | 单个档案最大 KB 数<br>Maximum file size in KB                                                                                         |
 | `allowMultiple`   | 是否允许一次上传多个档案，默认 `false`<br>Whether to allow uploading multiple files at once, defaults to `false`                              |
-| `storeDataAsText` | 是否将档案转为 Base64 储存，建议保持 `false`（使用 Google Drive 上传）<br>Whether to store file as Base64; keep `false` to use Google Drive upload |
+| `storeDataAsText` | 是否将档案转为 Base64 储存，**默认为 `true`**；必须显式设为 `false` 才会改为透过表单配置的档案储存供应商上传<br>Whether to store the file as Base64; **defaults to `true`**, must be explicitly set to `false` to upload through the form's configured file storage provider instead |
 
-上传后 Google Sheet 中储存的值为 Google Drive 的 **webViewLink**（可公开查看的连结）。\
-After upload, the value stored in Google Sheet is the Google Drive **webViewLink** (a publicly viewable URL).
+上传后 Google Sheet 中储存的值为该表单所配置的档案储存供应商回传的公开连结（如使用 Google Cloud Storage，则为 `storage.googleapis.com` 连结）。详见 [docs/file-storage-providers.md](file-storage-providers.md)。\
+After upload, the value stored in Google Sheet is the public URL returned by the form's configured file storage provider (e.g. a `storage.googleapis.com` link when using Google Cloud Storage). See [docs/file-storage-providers.md](file-storage-providers.md) for details.
 
 ```json
 {

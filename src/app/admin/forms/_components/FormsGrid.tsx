@@ -12,7 +12,7 @@ interface FormCard {
   expiryStatus: "active" | "expired" | "none";
   expiryDate: string | null;
   hasSheet: boolean;
-  hasDrive: boolean;
+  hasFileStorage: boolean;
   hasAuth: boolean;
   pageCount: number;
   questionCount: number;
@@ -72,7 +72,7 @@ export default function FormsGrid({ forms }: { forms: FormCard[] }) {
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
       {forms.map((f) => {
         const ps = populateStates[f.slug] ?? { status: "idle" };
-        const configScore = [f.hasAuth, f.hasSheet, f.hasDrive].filter(Boolean).length;
+        const configScore = [f.hasAuth, f.hasSheet, f.hasFileStorage].filter(Boolean).length;
 
         return (
           <Fragment key={f.slug}>
@@ -125,7 +125,7 @@ export default function FormsGrid({ forms }: { forms: FormCard[] }) {
               <div className="px-6 py-3.5 flex flex-wrap items-center gap-2.5 border-b-2 border-gray-100">
                 <ConfigBadge ok={f.hasAuth}  label="Auth"  icon="🔑" />
                 <ConfigBadge ok={f.hasSheet} label="Sheet" icon="📊" />
-                <ConfigBadge ok={f.hasDrive} label="Drive" icon="📁" />
+                <ConfigBadge ok={f.hasFileStorage} label="Storage" icon="🪣" />
 
                 <div className="ml-auto flex items-center gap-3 text-sm text-gray-500">
                   {!f.allowDuplicateEmails && (
@@ -141,11 +141,11 @@ export default function FormsGrid({ forms }: { forms: FormCard[] }) {
                   <p className="text-sm text-amber-800">
                     ⚠️ Missing:
                     {!f.hasAuth  && " Google credentials"}
-                    {!f.hasAuth && (!f.hasSheet || !f.hasDrive) && ","}
+                    {!f.hasAuth && (!f.hasSheet || !f.hasFileStorage) && ","}
                     {!f.hasSheet && " Sheet ID"}
-                    {!f.hasSheet && !f.hasDrive && ","}
-                    {!f.hasDrive && " Drive Folder ID"}
-                    {" — submissions won't sync to Google."}
+                    {!f.hasSheet && !f.hasFileStorage && ","}
+                    {!f.hasFileStorage && " File storage configuration"}
+                    {" — submissions won't sync to Google / uploads will fail."}
                   </p>
                 </div>
               )}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { IForm } from "@/types/form";
+import { FILE_STORAGE_PROVIDERS_META } from "@/libs/fileStorage/types";
 
 interface Props {
   form: Partial<IForm>;
@@ -23,13 +24,26 @@ export default function Step2GoogleAuth({ form, onChange }: Props) {
     onChange({ google: { ...google, ...patch } as NonNullable<IForm["google"]> });
   }
 
+  const fileStorage = form.fileStorage;
+  const provider = FILE_STORAGE_PROVIDERS_META.find((p) => p.key === fileStorage?.provider);
+
+  function setFileStorageProvider(providerKey: string) {
+    onChange({ fileStorage: { provider: providerKey, config: {} } });
+  }
+
+  function setFileStorageConfig(patch: Record<string, unknown>) {
+    if (!fileStorage) return;
+    onChange({
+      fileStorage: { ...fileStorage, config: { ...fileStorage.config, ...patch } },
+    });
+  }
+
   function applyPastedJson() {
     try {
       const parsed = JSON.parse(pasteJson);
       onChange({
         google: {
           sheetId: google.sheetId,
-          driveFolderId: google.driveFolderId,
           ...parsed,
         } as NonNullable<IForm["google"]>,
       });
@@ -44,7 +58,7 @@ export default function Step2GoogleAuth({ form, onChange }: Props) {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">Google Auth</h2>
+        <h2 className="text-lg font-semibold text-gray-800">Google Auth &amp; File Storage</h2>
         <button
           type="button"
           onClick={() => setPasteOpen(true)}
@@ -63,7 +77,7 @@ export default function Step2GoogleAuth({ form, onChange }: Props) {
             </h3>
             <p className="text-xs text-gray-500 mb-3">
               Paste the entire contents of your <code>google-services.json</code> file.
-              Existing <code>sheetId</code> and <code>driveFolderId</code> values will be preserved.
+              Existing <code>sheetId</code> value will be preserved.
             </p>
             <textarea
               rows={10}
@@ -93,19 +107,47 @@ export default function Step2GoogleAuth({ form, onChange }: Props) {
         </div>
       )}
 
-      {/* Sheet & Drive */}
+      {/* Sheet */}
       <fieldset className="border border-gray-200 rounded-md p-4 space-y-3">
         <legend className="text-xs font-semibold text-gray-500 px-1 uppercase tracking-wider">
-          Sheet &amp; Drive
+          Sheet
         </legend>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Google Sheet ID</label>
           <input type="text" value={(google.sheetId as string) ?? ""} onChange={(e) => setGoogle({ sheetId: e.target.value })} placeholder="1aBcDeFgHiJk…" className={inputCls} />
         </div>
+      </fieldset>
+
+      {/* File Storage */}
+      <fieldset className="border border-gray-200 rounded-md p-4 space-y-3">
+        <legend className="text-xs font-semibold text-gray-500 px-1 uppercase tracking-wider">
+          File Storage
+        </legend>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Drive Folder ID</label>
-          <input type="text" value={(google.driveFolderId as string) ?? ""} onChange={(e) => setGoogle({ driveFolderId: e.target.value })} placeholder="1YfwjATxb6_…" className={inputCls} />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+          <select
+            value={fileStorage?.provider ?? ""}
+            onChange={(e) => setFileStorageProvider(e.target.value)}
+            className={inputCls}
+          >
+            <option value="">None</option>
+            {FILE_STORAGE_PROVIDERS_META.map((p) => (
+              <option key={p.key} value={p.key}>{p.label}</option>
+            ))}
+          </select>
         </div>
+        {provider?.configFields.map(({ key, label, placeholder }) => (
+          <div key={key}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            <input
+              type="text"
+              value={(fileStorage?.config[key] as string) ?? ""}
+              onChange={(e) => setFileStorageConfig({ [key]: e.target.value })}
+              placeholder={placeholder}
+              className={inputCls}
+            />
+          </div>
+        ))}
       </fieldset>
 
       {/* Service Account fields */}
