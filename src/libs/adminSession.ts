@@ -32,12 +32,12 @@ function b64urlEncode(buf: ArrayBuffer): string {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
-function b64urlDecodeBytes(s: string): ArrayBuffer {
+function b64urlDecodeBytes(s: string): Uint8Array {
   const padded = s + "=".repeat((4 - (s.length % 4)) % 4);
   const binary = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
   const buf = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) buf[i] = binary.charCodeAt(i);
-  return buf.buffer;
+  return buf;
 }
 
 // --- Password hashing --------------------------------------------------
@@ -84,23 +84,16 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
     const valid = await globalThis.crypto.subtle.verify(
       "HMAC",
       key,
-      sigBytes,
+      sigBytes as BufferSource,
       enc.encode(b64)
     );
-    if (!valid) {
-      console.error("[verifyToken] DEBUG signature invalid, secretLen:", getSecret().length);
-      return null;
-    }
+    if (!valid) return null;
 
     const json = atob(b64.replace(/-/g, "+").replace(/_/g, "/") + "==");
     const payload: TokenPayload = JSON.parse(json);
-    if (Math.floor(Date.now() / 1000) > payload.exp) {
-      console.error("[verifyToken] DEBUG token expired", payload.exp, Math.floor(Date.now() / 1000));
-      return null;
-    }
+    if (Math.floor(Date.now() / 1000) > payload.exp) return null;
     return payload;
-  } catch (err) {
-    console.error("[verifyToken] DEBUG threw:", err instanceof Error ? err.message : err);
+  } catch {
     return null;
   }
 }
