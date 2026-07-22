@@ -6,7 +6,7 @@ export interface IForm {
     name: string;
     elements: object[];
     readTimeEnforcement?: number;
-    customData?: { sheetName?: string; [key: string]: unknown };
+    customData?: { [key: string]: unknown };
   }[];
   expiry?: {
     date: string;
@@ -17,6 +17,11 @@ export interface IForm {
     sheetId?: string;
     client_email: string;
     private_key: string;
+    /** Opt-in: copies each submission into an additional sheet tab based on one answer's value. */
+    sheetRouting?: {
+      field: string;
+      map: Record<string, string>;
+    };
     [key: string]: unknown;
   };
   fileStorage?: {

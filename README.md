@@ -88,11 +88,8 @@ The MongoDB document structure is exactly identical to a standard SurveyJS JSON 
       "readTimeEnforcement": 15
     },
     {
-      "name": "editorial_questions",
-      "elements": [ "..." ],
-      "customData": {
-        "sheetName": "Editorial"
-      }
+      "name": "department_questions",
+      "elements": [ "..." ]
     }
   ],
   "expiry": {
@@ -108,6 +105,13 @@ The MongoDB document structure is exactly identical to a standard SurveyJS JSON 
   },
   "google": {
     "sheetId": "1aBcDeFgHiJkLmNoPqRsTuVwXyZ...",
+    "sheetRouting": {
+      "field": "department",
+      "map": {
+        "editorial": "Editorial",
+        "logistics": "Logistics"
+      }
+    },
 
     "type": "service_account",
     "project_id": "your-project...",
@@ -141,6 +145,7 @@ Root property reference:
 | `google.sheetId`       | ❌              | 目标 Google Sheet ID<br>Target Google Sheet ID                                                                    |
 | `google.client_email`  | ✅*             | Service Account 的 Email（需有 Sheet 编辑权限，且为档案储存供应商所使用）<br>Service Account email (must have Editor access to the Sheet; also used by file storage providers) |
 | `google.private_key`   | ✅*             | Service Account 的私钥<br>Service Account private key                                                              |
+| `google.sheetRouting`  | ❌              | 可选插件配置，依据单一问题的答案将提交副本路由至额外分页（见下方「智能 Sheet 路由」）<br>Optional plugin config that routes a copy of each submission into an additional tab based on one answer's value (see "Intelligent Sheet Routing" below) |
 
 > ✅* 若需使用 Google Sheets 或档案上传功能，`client_email` 与 `private_key` 为必填。\
 > ✅* Required if Google Sheets or file upload features are needed.
@@ -179,11 +184,14 @@ The `/api/submit` endpoint intelligently maps and routes data dynamically based 
 
 1. **主表插入 / Master Insert:** 第一个工作表分页永远作为主数据日志，自动摄入整份表单的所有答案。\
    The absolutely first worksheet tab always serves as your master data log. It automatically ingests all answers from the entire form.
-2. **动态副本 / Dynamic Carbon Copies:** 脚本在处理过程中交叉参照用户产生的答案。当验证到包含 `customData.sheetName` 声明的 `pages` 时，若确认用户与该「团队页面」上的问题有互动，则会将整行提交数据镜像复制至对应的 Google Sheet 分页，互不干扰。\
-   The script cross-references the user's answers during processing. When it detects a `pages` entry with a `customData.sheetName` declaration and confirms the user answered questions on that page, it mirrors the entire submission row into that specific tab without disruption.
+2. **动态副本（插件功能）/ Dynamic Carbon Copies (plugin feature):** 此行为由 `src/plugins/sheet-routing` 提供，属于**可选插件**——核心提交逻辑本身对此一无所知。若表单的 `google.sheetRouting` 设置了 `{ field, map }`，后端会读取该 `field` 问题的答案值，在 `map` 中查找对应的分页名称，并将整行提交数据镜像复制到该分页。未设置 `sheetRouting` 的表单完全不受影响。\
+   This behavior is provided by the `src/plugins/sheet-routing` **optional plugin** — the core submit logic has no built-in knowledge of it. If a form's `google.sheetRouting` is set to `{ field, map }`, the backend reads the answer value of that `field`, looks up the matching tab name in `map`, and mirrors the entire submission row into that tab. Forms without `sheetRouting` configured are entirely unaffected.
 
-*这种灵活性意味着在后端新增一个全新部门，永远不需要修改后端代码！*\
-*This inherent flexibility means adding an entirely new team department to your backend explicitly never requires backend system modification!*
+*这种灵活性意味着新增一个路由目标（无论是部门、地区、赛道或其他分类）只需更新 MongoDB 中该表单的 `google.sheetRouting`，永远不需要修改后端代码！*\
+*This inherent flexibility means adding a new routing destination — whether it's a department, region, event track, or any other category — only requires updating that form's `google.sheetRouting` in MongoDB, and explicitly never requires backend code changes!*
+
+> 这不是团队招募专属的功能：`field`／`map` 可以对应任何单选题，用途不限于部门分流。若不需要此功能，可在 `src/plugins/registry.ts` 中移除该插件条目以完全停用。\
+> This isn't a recruitment- or team-specific feature: `field`/`map` can point at any single-answer question, for any routing purpose. If you don't need it, remove the plugin entry in `src/plugins/registry.ts` to disable it entirely.
 
 ---
 
@@ -212,8 +220,8 @@ The script authenticates using the credentials stored in MongoDB for that slug a
 
 1. **主工作表 / Master Sheet:** 第一个工作表将被格式化以包含所有全局问卷问题。\
    The first worksheet will be formatted to include all global survey questions.
-2. **动态团队工作表 / Dynamic Team Worksheets:** 若任何 `pages` 定义了 `customData.sheetName`，脚本会自动建立同名的独立分页，并填入通用问题和该页面专属问题。\
-   If any `pages` define `customData.sheetName`, the script automatically instantiates separate tabs named identically and populates them with both general questions and page-specific questions.
+2. **路由分页（依 `google.sheetRouting`）/ Routed Tabs (from `google.sheetRouting`):** 若表单的 `google.sheetRouting.map` 中列出了分页名称，脚本会为每个尚不存在的名称自动建立分页，并套用与主工作表完全相同的栏位（因为路由是依据单一答案值决定，而非依据页面分组）。\
+   If the form's `google.sheetRouting.map` lists tab names, the script automatically creates a tab for each name that doesn't already exist, using the exact same columns as the master sheet (since routing is decided by one answer's value, not by page grouping). See [docs/populate-google-sheet.md](docs/populate-google-sheet.md) for the full config reference.
 
 ### 可点击链接（Markdown 与 HTML）/ Adding Clickable Links (Markdown & HTML)
 

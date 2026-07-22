@@ -85,44 +85,25 @@ export async function populateSheetForSlug(
 
   const initializedSheets: string[] = [firstSheet.title];
 
-  // ── Team sheets (customData.sheetName) ────────────────
-  const generalQuestions = (form.pages || [])
-    .filter((page: any) => !page.customData?.sheetName)
-    .flatMap((page: any) => extractQuestions(page.elements || []));
+  // ── Routed sheets (google.sheetRouting) ────────────────
+  // Sub-sheets mirror the master sheet's full column set, since routing is
+  // decided by one answer's value rather than which page it lives on.
+  const routing = google.sheetRouting as
+    | { field?: string; map?: Record<string, string> }
+    | undefined;
+  const sheetTitles = routing?.map ? Array.from(new Set(Object.values(routing.map))) : [];
 
-  const teamPagesMap: Record<string, any[]> = {};
-  for (const page of form.pages || []) {
-    const sheetName = (page as any).customData?.sheetName;
-    if (sheetName) {
-      if (!teamPagesMap[sheetName]) teamPagesMap[sheetName] = [];
-      teamPagesMap[sheetName].push(page);
-    }
-  }
-
-  for (const [sheetTitle, pages] of Object.entries(teamPagesMap)) {
+  for (const sheetTitle of sheetTitles) {
     if (doc.sheetsByTitle[sheetTitle]) {
       initializedSheets.push(`${sheetTitle} (skipped — already exists)`);
       continue;
     }
-    const teamQuestions = pages.flatMap((page: any) =>
-      extractQuestions(page.elements || [])
-    );
-    const teamHeaders = [
-      ...defaultHeaders,
-      ...generalQuestions.map((q) => q.id),
-      ...teamQuestions.map((q) => q.id),
-    ];
-    const teamDescriptions = [
-      ...defaultHeaders,
-      ...generalQuestions.map((q) => q.title),
-      ...teamQuestions.map((q) => q.title),
-    ];
     const newSheet = await doc.addSheet({
       title: sheetTitle,
-      headerValues: teamHeaders,
-      gridProperties: { rowCount: 500, columnCount: teamHeaders.length },
+      headerValues: combinedHeaders,
+      gridProperties: { rowCount: 500, columnCount: combinedHeaders.length },
     });
-    await newSheet.addRow(teamDescriptions);
+    await newSheet.addRow(combinedDescriptions);
     initializedSheets.push(sheetTitle);
   }
 

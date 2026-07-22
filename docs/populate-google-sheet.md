@@ -74,8 +74,8 @@ Expands nested questions inside `panel` elements
      Row 2: each question's `title` (a human-readable description row)
    - 固定前两栏永远是 `Submission ID` 和 `Timestamp`\
      The first two columns are always `Submission ID` and `Timestamp`
-5. 若表单内有设置 `customData.sheetName` 的分页，脚本会为每个 sheetName **自动建立独立分页**，该分页包含通用问题 + 该分组专属问题\
-If any page has `customData.sheetName` set, the script **creates a separate tab** for each unique sheet name, containing general questions + that group's specific questions
+5. 若表单设置了 `google.sheetRouting.map`，脚本会为 `map` 中列出的每个分页名称**自动建立独立分页**，栏位与 Sheet1 完全相同（路由是依据单一答案值决定，而非依据页面分组，因此不需要narrow 到「该分组专属问题」）\
+If the form's `google.sheetRouting.map` is set, the script **creates a separate tab** for each unique tab name listed in `map`, using the exact same columns as Sheet1 (since routing is decided by one answer's value rather than by page grouping, there is no "that group's specific questions" subset to narrow down to)
 
 ---
 
@@ -92,29 +92,36 @@ The minimum fields the script reads from the form document:
       "name": "page1",
       "elements": [
         { "type": "text", "name": "full_name", "title": "Full Name" },
-        { "type": "text", "name": "email",     "title": "Email Address" }
+        { "type": "text", "name": "email",     "title": "Email Address" },
+        {
+          "type": "dropdown",
+          "name": "department",
+          "title": "Department",
+          "choices": [
+            { "value": "editorial", "text": "Editorial" },
+            { "value": "logistics", "text": "Logistics" }
+          ]
+        }
       ]
-      // 无 customData → 问题会进入 Sheet1
-      // No customData → questions go into Sheet1
-    },
-    {
-      "name": "editorial_team",
-      "elements": [
-        { "type": "text", "name": "portfolio", "title": "Portfolio Link" }
-      ],
-      "customData": {
-        "sheetName": "Editorial"   // 会建立独立的 "Editorial" 分页
-                                   // Creates a separate "Editorial" tab
-      }
     }
   ],
   "google": {
     "sheetId": "YOUR_GOOGLE_SHEET_ID",
     "client_email": "service-account@project.iam.gserviceaccount.com",
-    "private_key": "-----BEGIN PRIVATE KEY-----\n..."
+    "private_key": "-----BEGIN PRIVATE KEY-----\n...",
+    "sheetRouting": {
+      "field": "department",
+      "map": {
+        "editorial": "Editorial"   // 会建立独立的 "Editorial" 分页
+                                   // Creates a separate "Editorial" tab
+      }
+    }
   }
 }
 ```
+
+> `google.sheetRouting` 是**可选插件功能**（由 `src/plugins/sheet-routing` 提供），与表单本身的问题结构完全解耦 — 它不读取 `pages` 或 `customData`，只依据 `field` 指定的问题的答案值查表路由。详见下方「Sheet 路由插件」章节。\
+> `google.sheetRouting` is an **optional plugin feature** (provided by `src/plugins/sheet-routing`), fully decoupled from the form's question structure — it does not read `pages` or `customData`, it only looks up a routing destination based on the answer value of the question named in `field`. See the "Sheet Routing Plugin" section below.
 
 ---
 
@@ -130,7 +137,7 @@ Each item in the `pages` array represents one page of the form and supports the 
 | `name`                 | `string`   | ✅              | 页面的唯一识别码（不显示给用户）<br>Unique page identifier (not shown to users)                               |
 | `elements`             | `array`    | ✅              | 该页面包含的问题列表<br>List of questions on this page                                                  |
 | `readTimeEnforcement`  | `number`   | ❌              | 强制阅读秒数，倒数结束前「下一步」按钮为禁用状态<br>Seconds users must wait before the Next button is enabled         |
-| `customData.sheetName` | `string`   | ❌              | 指定后，此页问题会路由到独立的 Google Sheet 分页<br>If set, this page's questions are routed to a separate tab |
+| `customData`           | `object`   | ❌              | 供其他用途的自由格式元数据；分页路由已改由 `google.sheetRouting` 处理，不再读取此栏位<br>Free-form metadata for other uses; sheet routing is now handled by `google.sheetRouting` and no longer reads this field |
 
 ### `elements` 问题字段 / `elements` Question Fields
 
@@ -476,10 +483,15 @@ Groups multiple questions into a visual block. The panel itself creates no colum
             { "type": "text",    "name": "published_link",  "title": "Link to published work (if any)" }
           ]
         }
-      ],
-      "customData": { "sheetName": "Editorial" }
+      ]
     }
-  ]
+  ],
+  "google": {
+    "sheetRouting": {
+      "field": "department",
+      "map": { "editorial": "Editorial" }
+    }
+  }
 }
 ```
 
@@ -488,8 +500,45 @@ Groups multiple questions into a visual block. The panel itself creates no colum
 
 - **Sheet1**：包含所有页面的问题（`full_name`、`email`、`department`、`motivation`、`experience_level`、`resume`、`writing_sample`、`published_link`）\
   Contains all pages' questions
-- **Editorial 分页**：包含通用问题（`personal_info` + `general_questions`）＋ `editorial_specific` 专属问题（`writing_sample`、`published_link`）\
-  Contains general questions + Editorial-specific questions
+- **Editorial 分页**：与 Sheet1 拥有完全相同的栏位；当提交者的 `department` 答案为 `"editorial"` 时，该提交的整行数据会被复制到此分页（见下方「Sheet 路由插件」）\
+  Has the exact same columns as Sheet1; when a submitter's `department` answer is `"editorial"`, that submission's full row is copied into this tab (see "Sheet Routing Plugin" below)
+
+---
+
+## Sheet 路由插件 / Sheet Routing Plugin
+
+`google.sheetRouting` 是一个**可选插件功能**，由 `src/plugins/sheet-routing/index.ts` 实现，在 `/api/submit` 写入主表（Sheet1）之后运行。它与表单的 `pages`/`customData` 完全解耦——不扫描页面结构，只依据你指定的**单一问题**的答案值来决定要不要，以及复制到哪个分页。\
+`google.sheetRouting` is an **optional plugin feature**, implemented in `src/plugins/sheet-routing/index.ts`, that runs after `/api/submit` writes the master row (Sheet1). It is fully decoupled from the form's `pages`/`customData` — it does not scan page structure, it only decides whether (and where) to copy a row based on the answer value of **one question you designate**.
+
+### 配置格式 / Config Shape
+
+```json
+{
+  "google": {
+    "sheetRouting": {
+      "field": "department",
+      "map": {
+        "editorial": "Editorial",
+        "logistics": "Logistics",
+        "marketing": "Marketing"
+      }
+    }
+  }
+}
+```
+
+| 字段<br>Field           | 类型<br>Type             | 说明<br>Description                                                                                      |
+|------------------------|-------------------------|-----------------------------------------------------------------------------------------------------------|
+| `field`                | `string`                | 决定路由的问题 `name`（通常是 `radiogroup` 或 `dropdown`）<br>The question `name` that decides routing (typically a `radiogroup` or `dropdown`) |
+| `map`                  | `Record<string,string>` | 答案值 → 目标分页名称的对照表；未命中的答案不会产生任何副本<br>Lookup table from answer value → destination tab name; answers with no match produce no copy |
+
+这个功能**不限于团队招募场景**——`field` 可以是任何单选题，`map` 的用途可以是地区分流、活动赛道分流，或任何你需要把提交副本分流到不同分页的场景。\
+This feature is **not limited to team recruitment scenarios** — `field` can be any single-answer question, and `map` can be used for regional routing, event-track routing, or any scenario where you need to split submission copies across different tabs.
+
+### 停用此插件 / Disabling This Plugin
+
+若你的表单不需要此功能，只需省略 `google.sheetRouting`——不设置就完全不会触发。若要在整个部署中彻底移除此插件（例如你在 fork 这个专案，且完全不需要 Sheet 路由），从 `src/plugins/registry.ts` 的 `enabledPlugins` 数组中移除 `sheetRouting` 条目即可，核心提交逻辑不会因此受影响。\
+If your form doesn't need this, simply omit `google.sheetRouting` — nothing triggers without it. To remove this plugin entirely from a deployment (e.g. you're forking this project and don't need sheet routing at all), remove the `sheetRouting` entry from the `enabledPlugins` array in `src/plugins/registry.ts`; the core submit logic is unaffected either way.
 
 > **注意 / Note:** `introduction` 页只有 `html` 类型，**不会**产生任何 Sheet 栏位。`readTimeEnforcement: 20` 会让用户在该页停留 20 秒后才能继续，但此字段对 Google Sheet 无影响。\
 > The `introduction` page contains only an `html` element — **no columns are created**. `readTimeEnforcement: 20` forces users to wait 20 seconds on that page before proceeding, but has no effect on the Sheet structure.
@@ -503,20 +552,20 @@ After running, the Google Sheet will look like this:
 
 **Sheet1（主分页 / Main tab）**
 
-| Submission ID              | Timestamp | full_name | email         | portfolio      | … |
-|----------------------------|-----------|-----------|---------------|----------------|---|
-| *(header row — 程式码 ID)*    |           |           |               |                |   |
-| *(description row — 人类可读)* |           | Full Name | Email Address | Portfolio Link | … |
+| Submission ID              | Timestamp | full_name | email         | department | … |
+|----------------------------|-----------|-----------|---------------|------------|---|
+| *(header row — 程式码 ID)*    |           |           |               |            |   |
+| *(description row — 人类可读)* |           | Full Name | Email Address | Department | … |
 
-**Editorial（自动建立的分页 / Auto-created tab）**
+**Editorial（由 `google.sheetRouting` 自动建立的分页 / Auto-created tab from `google.sheetRouting`）**
 
-| Submission ID       | Timestamp | full_name | email         | portfolio      |
-|---------------------|-----------|-----------|---------------|----------------|
-| *(header row)*      |           |           |               |                |
-| *(description row)* |           | Full Name | Email Address | Portfolio Link |
+| Submission ID       | Timestamp | full_name | email         | department |
+|---------------------|-----------|-----------|---------------|------------|
+| *(header row)*      |           |           |               |            |
+| *(description row)* |           | Full Name | Email Address | Department |
 
-> **注意 / Note:** 自动建立的分页包含通用问题（无 `customData.sheetName` 的页面）＋ 该分页专属问题，方便每个部门独立筛选回应。\
-> Auto-created tabs include general questions (pages without `customData.sheetName`) plus that tab's specific questions, so each department can filter responses independently.
+> **注意 / Note:** 由 `sheetRouting` 自动建立的分页与 Sheet1 拥有**完全相同**的栏位（不再依据页面分组narrow 到「专属问题」），只有当提交者在 `sheetRouting.field` 指定的问题上给出 `sheetRouting.map` 中命中的答案时，该行才会被复制过来。\
+> Tabs auto-created from `sheetRouting` have the **exact same** columns as Sheet1 (no longer narrowed to a page-group's "specific questions") — a row is only copied over when the submitter's answer to the question named in `sheetRouting.field` matches an entry in `sheetRouting.map`.
 
 ---
 

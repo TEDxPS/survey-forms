@@ -82,14 +82,6 @@ export async function POST(req: Request) {
     const sheet = doc.sheetsByIndex[0];
     await sheet.addRow(sheetData);
 
-    // 添加到团队表
-    if (data["first_choice"] && data["first_choice"]["value"]) {
-      const teamSheet = doc.sheetsByTitle[data["first_choice"]["value"]];
-      if (teamSheet) {
-        await teamSheet.addRow(sheetData);
-      }
-    }
-
     return Response.json({ data: "OK", email: email });
   } catch (error) {
     console.error("Error processing request:", error);

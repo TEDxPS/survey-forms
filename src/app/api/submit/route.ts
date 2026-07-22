@@ -4,6 +4,7 @@ import dbConnect from "@/libs/mongodb";
 import { parsePrivateKey } from "@/libs/googleAuth";
 import { getFormSubmissionModel } from "@/models/FormSubmission";
 import Form, { IForm } from "@/models/Form";
+import { enabledPlugins } from "@/plugins/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -108,41 +109,9 @@ export async function POST(req: Request) {
     const sheet = doc.sheetsByIndex[0]; // or use `doc.sheetsById[id]` or `doc.sheetsByTitle[title]`
     await sheet.addRow(sheetData);
 
-    if (formObj && formObj.pages) {
-      const activeSheetNames = new Set<string>();
-
-      const extractNames = (elements: any[] = []): string[] => {
-        return elements.flatMap((el: any) => {
-          const names: string[] = [];
-          if (el.name && el.type !== "html" && el.type !== "expression") {
-            names.push(el.name);
-          }
-          if (el.elements) {
-            names.push(...extractNames(el.elements));
-          }
-          return names;
-        });
-      };
-
-      for (const page of formObj.pages) {
-        if (page.customData && page.customData.sheetName) {
-          const pageNames = extractNames(page.elements);
-          // If the user provided ANY answer to any question on this team page, they must have seen it / chosen it
-          const hasAnswers = pageNames.some(
-            (name) => processedData[name] !== undefined && processedData[name] !== null && processedData[name] !== ""
-          );
-          if (hasAnswers) {
-            activeSheetNames.add(page.customData.sheetName);
-          }
-        }
-      }
-
-      for (const sheetName of Array.from(activeSheetNames)) {
-        const teamSheet = doc.sheetsByTitle[sheetName];
-        if (teamSheet) {
-          await teamSheet.addRow(sheetData);
-          console.log(`Routed submission copy to team sheet: ${sheetName}`);
-        }
+    if (formObj) {
+      for (const plugin of enabledPlugins) {
+        await plugin.onSubmit({ doc, form: formObj, processedData, sheetData });
       }
     }
   } else {
