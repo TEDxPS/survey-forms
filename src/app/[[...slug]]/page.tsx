@@ -4,84 +4,17 @@ import Image from 'next/image';
 import type { Metadata } from 'next';
 import dbConnect from "@/libs/mongodb";
 import Form, { IForm } from "@/models/Form";
-
-const keywords = [
-  'TEDx',
-  'TED',
-  'TED Talk',
-  'TEDxPetalingStreet',
-  'TEDxPS',
-  'Ideas Change Everything',
-  'Innovation',
-  'Inspiration',
-  'Community event',
-  'Thought leadership',
-  'Knowledge sharing',
-  'Local voices',
-  'Global ideas',
-  'Petaling Street',
-  'Kuala Lumpur',
-  'Malaysia',
-  'Conferences',
-  'Speaker series',
-  'Chinese',
-  'Multilingual events',
-  'Cultural exchange',
-  'Transformative ideas'
-]
+import { getSiteConfig } from "@/libs/siteConfig";
 
 const authors = [
   { name: 'TEDxPetalingStreet Info Tech Team' }
 ]
 
-const baseMetadata: Metadata = {
-  title: "TEDxPetalingStreet Volunteer Application | Ideas Change Everything",
-  description: "Join us in our journey of sharing inspiring Malaysian stories to showcase our brilliance to the world!",
-  applicationName: 'TEDxPetalingStreet Volunteer Application',
-  referrer: 'origin-when-cross-origin',
-  keywords: keywords,
-  authors: authors,
-  openGraph: {
-    title: 'TEDxPetalingStreet Volunteer Application | Ideas Change Everything',
-    description: "Join us in our journey of sharing inspiring Malaysian stories to showcase our brilliance to the world!",
-    url: 'https://forms.tedxpetalingstreet.com/recruitment-2026',
-    siteName: 'TEDxPetalingStreet Volunteer Application | Ideas Change Everything',
-    images: [
-      {
-        url: 'https://forms.tedxpetalingstreet.com/tedx-hero.jpeg',
-        width: 1200,
-        height: 630,
-        alt: 'TEDxPetalingStreet Main Image',
-      },
-    ],
-    locale: 'en',
-    type: 'website',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      noimageindex: false,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  alternates: {
-    canonical: 'https://forms.tedxpetalingstreet.com/recruitment-2026'
-  },
-  icons: {
-    icon: '/icons/favicon.ico'
-  },
-};
-
 export async function generateMetadata({ params }: { params: { slug?: string[] } }): Promise<Metadata> {
-  let heroImage = '/tedx-hero.jpeg';
-  let title = baseMetadata.title;
-  let description = baseMetadata.description;
+  const site = await getSiteConfig();
+  let heroImage = site.defaultHeroImage;
+  let title = site.title;
+  let description = site.description;
   const slug = params?.slug?.[0] || '';
 
   try {
@@ -97,34 +30,56 @@ export async function generateMetadata({ params }: { params: { slug?: string[] }
     console.error("Error fetching metadata:", e);
   }
 
-  const currentUrl = `https://forms.tedxpetalingstreet.com${slug ? `/${slug}` : ''}`;
+  const currentUrl = `${site.domain}${slug ? `/${slug}` : ''}`;
 
   return {
-    ...baseMetadata,
-    title: title || undefined,
-    description: description || undefined,
+    title,
+    description,
+    applicationName: site.siteName,
+    referrer: 'origin-when-cross-origin',
+    keywords: site.keywords,
+    authors: authors,
     alternates: {
       canonical: currentUrl
     },
     openGraph: {
-      ...baseMetadata.openGraph,
-      title: title || undefined,
-      description: description || undefined,
+      title,
+      description,
       url: currentUrl,
+      siteName: site.siteName,
       images: [
         {
-          url: heroImage.startsWith('http') ? heroImage : `https://forms.tedxpetalingstreet.com${heroImage}`,
+          url: heroImage.startsWith('http') ? heroImage : `${site.domain}${heroImage}`,
           width: 1200,
           height: 630,
-          alt: (title as string) || 'TEDxPetalingStreet Main Image',
+          alt: title || `${site.siteName} Main Image`,
         },
       ],
-    }
+      locale: 'en',
+      type: 'website',
+    },
+    robots: {
+      index: true,
+      follow: true,
+      nocache: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        noimageindex: false,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    icons: {
+      icon: site.favicon
+    },
   };
 }
 
 export default async function Homepage({ params }: { params: { slug?: string[] } }) {
-  let heroImage = '/tedx-hero.jpeg';
+  const site = await getSiteConfig();
+  let heroImage = site.defaultHeroImage;
   const slug = params?.slug?.[0] || '';
 
   try {

@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import dbConnect from "@/libs/mongodb";
 import FormSubmission from "@/models/FormSubmission";
+import { getSiteConfig } from "@/libs/siteConfig";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,11 @@ export async function POST() {
   if (!submission) {
     return Response.json({ data: "Nothing in queue" });
   }
+
+  const site = await getSiteConfig();
+  const logoUrl = site.logo.startsWith('http')
+    ? site.logo
+    : `${process.env.NEXT_PUBLIC_BASE_URL || site.domain}${site.logo}`;
 
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
@@ -37,9 +43,9 @@ export async function POST() {
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="text-align: center; margin-bottom: 20px;">
-        <img src="${process.env.NEXT_PUBLIC_BASE_URL}/tedxps_logo.png" alt="TEDxPetallingStreet Logo" style="max-width: 200px; height: auto;"/>
+        <img src="${logoUrl}" alt="${site.siteName} Logo" style="max-width: 200px; height: auto;"/>
       </div>
-      <h1 style="color: #eb0028;">TEDxPetalingStreet Volunteer Application</h1>
+      <h1 style="color: #eb0028;">${site.title}</h1>
       <p>Thank you for your interest in joining TEDxPetalingStreet Volunteer. Here's a summary of your submission:</p>
       
       <div style="background: #f5f5f5; padding: 20px; border-radius: 5px;">

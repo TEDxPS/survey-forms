@@ -7,6 +7,7 @@ import { useState } from "react";
 const navItems = [
   { href: "/admin/forms", label: "Forms", icon: "📋" },
   { href: "/admin/users", label: "Users", icon: "👤" },
+  { href: "/admin/site-config", label: "Site Config", icon: "🎨" },
 ];
 
 export default function AdminNav() {

@@ -152,6 +152,16 @@ Root property reference:
 
 ---
 
+## 🎨 站点品牌配置（MongoDB）/ Site Branding Configuration (MongoDB)
+
+Logo、favicon、社群媒体链接、预设 Hero 图片，以及网站标题／描述／关键字，都可以透过 MongoDB 中 `siteconfig` 集合内的**单一文档**进行配置——无需修改代码或重新部署。实际的图片资产仍必须存在于代码库的 `public/` 目录，此配置只决定「要使用哪一个既有档案」。若没有设置此文档，应用会使用内建的 TEDxPetalingStreet 默认值。\
+The logo, favicon, social media links, default hero image, and site title/description/keywords can all be configured through a **single document** in the `siteconfig` MongoDB collection — no code changes or redeploys needed. The actual image assets must still exist in the repo's `public/` directory; this config only decides *which* existing file to use. If this document isn't set, the app falls back to the built-in TEDxPetalingStreet defaults.
+
+详见 [docs/site-config.md](docs/site-config.md)。\
+See [docs/site-config.md](docs/site-config.md) for the full schema.
+
+---
+
 ## 📊 整合与数据路由 / Integrations & Data Routing
 
 ### Google Sheets 提交与档案上传 / Google Sheets Submissions & File Uploads
