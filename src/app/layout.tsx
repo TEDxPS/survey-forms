@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/shared/Header";
+import Footer from "@/components/shared/Footer";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import React from 'react';
 
@@ -24,6 +25,7 @@ export default function RootLayout({
       <body className={`${inter.className} bg-black`}>
         <Header />
         <main>{children}</main>
+        <Footer />
       </body>
       <GoogleAnalytics gaId={gaTagId} />
 

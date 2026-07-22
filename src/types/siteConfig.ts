@@ -20,4 +20,6 @@ export interface ISiteConfig {
   /** Path under /public, used when a form doesn't set its own `heroImage`. */
   defaultHeroImage?: string;
   socialLinks?: SocialLink[];
+  /** Source repo URL, shown in the footer to invite other chapters/orgs to self-host. */
+  repoUrl?: string;
 }

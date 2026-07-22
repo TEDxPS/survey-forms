@@ -88,7 +88,7 @@ export default function SiteConfigForm({ initialConfig }: Props) {
             onChange={(e) => patch({ title: e.target.value })}
             className={inputCls}
           />
-          <p className="mt-1 text-xs text-gray-400">A form's own `title` field overrides this.</p>
+          <p className="mt-1 text-xs text-gray-400">A form&apos;s own `title` field overrides this.</p>
         </div>
 
         <div>
@@ -99,7 +99,7 @@ export default function SiteConfigForm({ initialConfig }: Props) {
             onChange={(e) => patch({ description: e.target.value })}
             className={inputCls}
           />
-          <p className="mt-1 text-xs text-gray-400">A form's own `description` field overrides this.</p>
+          <p className="mt-1 text-xs text-gray-400">A form&apos;s own `description` field overrides this.</p>
         </div>
 
         <div>
@@ -132,6 +132,20 @@ export default function SiteConfigForm({ initialConfig }: Props) {
             placeholder="https://forms.example.com"
             className={inputCls}
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Repo URL</label>
+          <input
+            type="text"
+            value={config.repoUrl}
+            onChange={(e) => patch({ repoUrl: e.target.value })}
+            placeholder="https://github.com/your-org/your-fork"
+            className={inputCls}
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Shown in the footer CTA and as a GitHub icon in the header&apos;s social links.
+          </p>
         </div>
       </section>
 
@@ -172,7 +186,7 @@ export default function SiteConfigForm({ initialConfig }: Props) {
             placeholder="/my-org-hero.jpeg"
             className={inputCls}
           />
-          <p className="mt-1 text-xs text-gray-400">Used when a form doesn't set its own `heroImage`.</p>
+          <p className="mt-1 text-xs text-gray-400">Used when a form doesn&apos;t set its own `heroImage`.</p>
         </div>
       </section>
 

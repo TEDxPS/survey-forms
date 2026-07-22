@@ -29,7 +29,8 @@ The collection name is `siteconfig`, and it should contain **only one document**
     { "platform": "website", "icon": "/icons/website.svg", "url": "https://www.myorg.com", "label": "Official Site" },
     { "platform": "facebook", "icon": "/icons/facebook.png", "url": "https://www.facebook.com/myorg" },
     { "platform": "instagram", "icon": "/icons/instagram.png", "url": "https://www.instagram.com/myorg/" }
-  ]
+  ],
+  "repoUrl": "https://github.com/your-org/your-fork"
 }
 ```
 
@@ -48,6 +49,7 @@ The collection name is `siteconfig`, and it should contain **only one document**
 | `favicon`           | `string`           | Favicon 的路径，指向 `public/` 内已存在的档案<br>Path to the favicon, pointing at a file that already exists in `public/` |
 | `defaultHeroImage`  | `string`           | 当表单本身未设置 `heroImage` 时使用的预设 Hero 图片路径<br>Default hero image path used when a form doesn't set its own `heroImage` |
 | `socialLinks`       | `SocialLink[]`     | 页首显示的社群媒体链接列表，见下方<br>List of social links shown in the header, see below                              |
+| `repoUrl`           | `string`           | 此项目的源码仓库链接，显示于页尾的开源邀请文字，也可作为页首的 GitHub 图示链接<br>This project's source repo URL, shown in the footer's open-source invitation text, and usable as the header's GitHub icon link |
 
 ### `socialLinks` 项目结构 / `socialLinks` Item Shape
 

@@ -49,7 +49,9 @@ export const DEFAULT_SITE_CONFIG: ResolvedSiteConfig = {
     { platform: "youtube", icon: "/icons/youtube.png", url: "https://www.youtube.com/@TedxPetalingStreet" },
     { platform: "linkedin", icon: "/icons/linkedin.png", url: "https://my.linkedin.com/company/tedxpetalingstreet" },
     { platform: "tiktok", icon: "/icons/tiktok.png", url: "https://www.tiktok.com/@tedxpetalingstreet" },
+    { platform: "github", icon: "/icons/github.svg", url: "https://github.com/TEDxPS/survey-forms" },
   ],
+  repoUrl: "https://github.com/TEDxPS/survey-forms",
 };
 
 /**
@@ -74,6 +76,7 @@ export const getSiteConfig = cache(async (): Promise<ResolvedSiteConfig> => {
       favicon: config.favicon || DEFAULT_SITE_CONFIG.favicon,
       defaultHeroImage: config.defaultHeroImage || DEFAULT_SITE_CONFIG.defaultHeroImage,
       socialLinks: config.socialLinks?.length ? config.socialLinks : DEFAULT_SITE_CONFIG.socialLinks,
+      repoUrl: config.repoUrl || DEFAULT_SITE_CONFIG.repoUrl,
     };
   } catch (e) {
     console.error("Error fetching site config:", e);
